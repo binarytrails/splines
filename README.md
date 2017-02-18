@@ -42,23 +42,23 @@ An example command:
 
     left mouse click    marks control points in the window
 
-    enter       compute and draw the spline based on the control points
-    backspace   resets the application i.e. removes all control points, interpolated points etc
+    enter               computes and draws the spline based on the control points
+    backspace           resets the application (removes all control points, interpolated points etc)
 
-    rotate      arrows
+    rotate              arrows
     
-    w           move forward
-    s           move backward
-    a           move left
-    d           move right
+    w                   move forward
+    s                   move backward
+    a                   move left
+    d                   move right
     
-    l           display lines
-    t           display triangles
-    p           display points
+    l                   display lines
+    t                   display triangles
+    p                   display points
 
 ## Setup
 
-It was tested on Arch Linux but I wrote the Makefile command which should work on general GNU / Linux distributions.
+It was tested on Arch Linux.
 
 ### Arch Linux
 
@@ -72,7 +72,7 @@ Compile:
 
 ### Linux (general)
 
-Install the requiered libraries and compile:
+Install the dependencies and compile:
 
     make linux
 
