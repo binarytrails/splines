@@ -1,0 +1,1 @@
+build/./mesh.out $@
