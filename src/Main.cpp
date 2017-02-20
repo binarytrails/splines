@@ -18,11 +18,11 @@ Window* window;
 Camera* camera;
 Mesh* mesh;
 
-double cursorRelX, cursorRelY;
-bool cursorZoom = false;
-
 GLenum polygonMode = GL_TRIANGLES;
 GLenum renderMode = GL_TRIANGLES;
+
+bool splineInput = true;
+uint8_t splineCounter = 1;
 
 // Callbacks
 void key_callback(GLFWwindow* w, int key, int scancode, int action, int mode);
@@ -90,14 +90,16 @@ int main(int argc,char *argv[])
 
 // Callbacks
 
-void framebuffer_size_callback(GLFWwindow* w, int width, int height)
+void framebuffer_size_callback(GLFWwindow* w,
+                               int width, int height)
 {
     window->width(width);
     window->height(height);
     glViewport(0, 0, width, height);
 }
 
-void key_callback(GLFWwindow* w, int key, int scancode, int action, int mode)
+void key_callback(GLFWwindow* w, int key, int scancode,
+                  int action, int mode)
 {
     //printf("keyboard: %i\n", key);
 
@@ -157,14 +159,35 @@ void key_callback(GLFWwindow* w, int key, int scancode, int action, int mode)
     }
 }
 
-void mouse_key_callback(GLFWwindow* w, int key, int action, int mode)
+void mouse_key_callback(GLFWwindow* w, int key,
+                        int action, int mode)
 {
-    if (key == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+    if (key == GLFW_MOUSE_BUTTON_LEFT &&
+        action == GLFW_PRESS)
     {
-        cursorZoom = true;
-    }
-    else if (key == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
-    {
-        cursorZoom = false;
+        double cursorX, cursorY;
+        glfwGetCursorPos(window->get(),
+                         &cursorX, &cursorY);
+
+        // mirror top right as 0 -> bottom left as 0
+        cursorY = (double) window->height() - (GLfloat) cursorY;
+        cursorX = cursorX;
+
+        glm::vec3 p;
+
+        if (splineCounter == 1 && splineInput)
+        {
+            p.x = (GLfloat) cursorX;
+            p.z = (GLfloat) cursorY;
+        }
+        else if (splineCounter = 2 && splineInput)
+        {
+            p.x = (GLfloat) cursorX;
+            p.y = (GLfloat) cursorY;
+        }
+        mesh->addVertex(p);
+
+        printf("add point: (%f, %f, %f)\n", p.x, p.y, p.z);
+        mesh->printVertices();
     }
 }

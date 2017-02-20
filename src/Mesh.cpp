@@ -18,7 +18,7 @@ Mesh::Mesh(const std::string filepath) :
     Mesh()
 {
     this->inputFilepath = filepath;
-    this->readInput();
+    this->extractInputFileData();
     this->sweep();
 }
 
@@ -105,7 +105,7 @@ void Mesh::render(const Window* window,
         projLoc, 1, GL_FALSE,
         glm::value_ptr(this->projection));
 
-    /*
+    /* TODO move to draw
     // draw triangle
     glBindVertexArray(this->vaoId);
     //glDrawArrays(renderMode, 0, mesh->vertices.size()); // without EBO
@@ -115,6 +115,12 @@ void Mesh::render(const Window* window,
     */
 }
 
+void Mesh::addVertex(const glm::vec3 v)
+{
+    this->vertices.push_back(v);
+}
+
+// TODO use glm:vec4 & rotate
 void Mesh::rotate(const int x, const int y, const int z)
 {
     //printf("x: %i  y: %i  z: %i\n", x, y, z);
@@ -139,7 +145,7 @@ void Mesh::rotate(const int x, const int y, const int z)
     }
 }
 
-void Mesh::readInput()
+void Mesh::extractInputFileData()
 {
 	GLfloat x, y, z;
     short choice;
@@ -316,21 +322,28 @@ std::vector<glm::vec3> Mesh::translateProfileCurve(
     return new_p;
 }
 
-void Mesh::printInputData()
+void Mesh::printInputData() const
 {
     std::cout << "Profile points: " <<
                  this->profileVertices.size() << std::endl <<
                  "Profile vertices: " << std::endl;
-                 this->printVertices(this->profileVertices);
-                 std::cout << std::endl;
+
+    for(auto const& v: this->profileVertices)
+    {
+        printf("(%f, %f, %f)\n", v[0], v[1], v[2]);
+    }
+    printf("\n");
 
     if (this->translationalSweep)
     {
         std::cout << "Trajectory points: " <<
                      this->trajectoryVertices.size() << std::endl <<
                      "Trajectory vertices: " << std::endl;
-                     this->printVertices(this->trajectoryVertices);
-                     std::cout << std::endl;
+
+        for(auto const& v: this->trajectoryVertices)
+        {
+            printf("(%f, %f, %f)\n", v[0], v[1], v[2]);
+        }
     }
     else
     {
@@ -346,16 +359,16 @@ void Mesh::pushVertices(std::vector<glm::vec3> vec)
     }
 }
 
-void Mesh::printVertices(std::vector<glm::vec3> &vertices) const
+void Mesh::printVertices() const
 {
-    for(auto const& v: vertices)
+    for(auto const& v: this->vertices)
     {
         printf("(%f, %f, %f)\n", v[0], v[1], v[2]);
     }
     printf("\n");
 }
 
-void Mesh::printVerticesIndices()
+void Mesh::printVerticesIndices() const
 {
     for(unsigned int i = 0; i < this->verticesIndices.size(); i++)
     {

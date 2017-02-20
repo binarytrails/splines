@@ -34,31 +34,27 @@ class Mesh
         Mesh(const std::string filepath);
         ~Mesh();
 
+        GLenum getRenderMode() const;
+
         void initBuffers();
 
         void render(const Window* window,
                     const Camera* camera);
 
-        void rotate(const int x, const int y, const int z);
-
-        void readInput();
-        void sweep();
-
+        void addVertex(const glm::vec3 v);
         void genVerticesIndices(const GLenum renderMode);
 
-        GLenum getRenderMode() const;
+        void sweep();
 
-        void printVertices(std::vector<glm::vec3> &vertices) const;
-        void printVerticesIndices();
-        void printInputData();
+        void rotate(const int x, const int y, const int z);
 
-        // TODO private
-        std::vector<glm::vec3> vertices;
-        std::vector<GLushort> verticesIndices;
-        // input file type
-        bool translationalSweep = false;    // false = rotational
+        void printInputData() const;
+        void printVertices() const;
+        void printVerticesIndices() const;
 
     private:
+        void extractInputFileData();
+
         void formatVerticesForVBO(
             std::vector<glm::vec3> p1,
             std::vector<glm::vec3> p2);
@@ -72,8 +68,10 @@ class Mesh
 
         Shader* shader;
         GLuint vboId, vaoId, eboId;
-        std::string inputFilepath;
         GLenum renderMode;
+        std::string inputFilepath;
+        // input file type (false = rotational)
+        bool translationalSweep = false;
         // input file params
         unsigned int profilePoints = 0;
         unsigned int trajectoryPoints = 0;
@@ -81,6 +79,9 @@ class Mesh
         // polylines of input file
         std::vector<glm::vec3> profileVertices;
         std::vector<glm::vec3> trajectoryVertices;
+        // mesh vertex data
+        std::vector<glm::vec3> vertices;
+        std::vector<GLushort> verticesIndices;
         // coordinate system
         glm::mat4 model;
         glm::mat4 view;
