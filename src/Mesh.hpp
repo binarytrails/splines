@@ -21,8 +21,11 @@
 class Mesh
 {
     public:
+        Mesh();
         Mesh(const std::string filepath);
         ~Mesh();
+
+        void initBuffers();
 
         void rotate(const int x, const int y, const int z);
 
@@ -48,6 +51,8 @@ class Mesh
         float yAngle = 0.0f;
 
     private:
+        GLuint vboId, vaoId, eboId;
+
         void formatVerticesForVBO(std::vector<glm::vec3> p1,
                                   std::vector<glm::vec3> p2);
 

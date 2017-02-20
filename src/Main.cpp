@@ -29,19 +29,13 @@ void framebuffer_size_callback(GLFWwindow* w, int width, int height);
 
 int main(int argc,char *argv[])
 {
-    if (argc < 2)
+    // input file
+    if (argc == 2)
     {
-        printf("You must pass an input filepath as first argument.\n");
-        return 0;
     }
 
     camera = new Camera();
-    mesh = new Mesh(argv[1]);
-
-    mesh->printInputData();
-    mesh->genVerticesIndices(renderMode);
-    std::cout << "Vertices: " << std::endl; mesh->printVertices(mesh->vertices);
-    std::cout << "Vertices Indices: "; mesh->printVerticesIndices();
+    mesh = new Mesh();
 
     window = new Window(800, 800, "Assignment 1");
 
@@ -61,29 +55,7 @@ int main(int argc,char *argv[])
     Shader ourShader("src/shaders/default.vs",
                      "src/shaders/default.fs");
 
-    GLuint vboId, vaoId, eboId;
-
-    glGenBuffers(1, &vboId);
-    glGenVertexArrays(1, &vaoId);
-    glGenBuffers(1, &eboId);
-
-    glBindVertexArray(vaoId);
-
-    glBindBuffer(GL_ARRAY_BUFFER, vboId);
-    glBufferData(GL_ARRAY_BUFFER,
-                 sizeof(glm::vec3) * mesh->vertices.size(),
-                 &mesh->vertices[0], GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, eboId);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-                 sizeof(mesh->verticesIndices) * mesh->verticesIndices.size(),
-                 &mesh->verticesIndices[0], GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), NULL);
-    glEnableVertexAttribArray(0); // enable vao -> vbo
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0); // TODO comment
-    glBindVertexArray(0); // unbind from vao
+    //mesh->initBuffers();
 
     // Game loop
     while (!glfwWindowShouldClose(window->get()))
@@ -96,16 +68,12 @@ int main(int argc,char *argv[])
         glClearColor(255, 255, 255, 0); // background color
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
         // GL_FILL [F key]; GL_LINE [L key]
         glPolygonMode(GL_FRONT_AND_BACK, polygonMode);
 
         if (mesh->getRenderMode() != renderMode)
         {
             mesh->genVerticesIndices(renderMode);
-            //mesh->printVertices();
-            //printf("%i\n",renderMode);
-            //mesh->printVerticesIndices();
         }
 
         // activate shader
@@ -120,16 +88,11 @@ int main(int argc,char *argv[])
         model = glm::rotate(model, mesh->yAngle,glm::vec3(0.0f, 1.0f, 0.0f));
 
         view = glm::translate(camera->view(), glm::vec3(0.0f, 0.0f, -3.0f));
-        //view = camera->view();
 
         projection = glm::perspective(
-            // zoom everything in or out
             fieldOfView,
-            // aspect ratio
             (GLfloat)window->width() / (GLfloat)window->height(),
-            // near plane - not drawn before
             0.1f,
-            // far plane - not drawn after
             100.0f
         );
 
@@ -144,18 +107,21 @@ int main(int argc,char *argv[])
         // TODO move out of loop since static to avoid sending on each frame
         glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
+        // TODO move into Mesh
+        /*
         // draw triangle
-        glBindVertexArray(vaoId);
+        glBindVertexArray(this->vaoId);
         //glDrawArrays(renderMode, 0, mesh->vertices.size()); // without EBO
-        glDrawElements(renderMode, mesh->verticesIndices.size(),
+        glDrawElements(renderMode, this->verticesIndices.size(),
                        GL_UNSIGNED_SHORT, 0);
         glBindVertexArray(0);
+        */
 
         // swap the screen buffers
         glfwSwapBuffers(window->get());
     }
-    glDeleteVertexArrays(1, &vaoId);
-    glDeleteBuffers(1, &vboId);
+    //glDeleteVertexArrays(1, &vaoId);
+    //glDeleteBuffers(1, &vboId);
 
     delete camera;
     delete mesh;

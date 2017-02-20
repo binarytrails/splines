@@ -1,5 +1,11 @@
 #include <Mesh.hpp>
 
+Mesh::Mesh()
+{
+    this->vertices.clear();
+    this->verticesIndices.clear();
+}
+
 Mesh::Mesh(const std::string filepath)
 {
     this->inputFilepath = filepath;
@@ -9,6 +15,38 @@ Mesh::Mesh(const std::string filepath)
 
 Mesh::~Mesh()
 {
+}
+
+void Mesh::initBuffers()
+{
+
+    glGenBuffers(1, &this->vboId);
+    glGenVertexArrays(1, &this->vaoId);
+    glGenBuffers(1, &this->eboId);
+
+    glBindBuffer(GL_ARRAY_BUFFER, this->vboId);
+    glBufferData(GL_ARRAY_BUFFER,
+                 sizeof(glm::vec3) * this->vertices.size(),
+                 &this->vertices[0], GL_STATIC_DRAW);
+
+    // has to be before ebo bind
+    glBindVertexArray(this->vaoId);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->eboId);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+                 sizeof(this->verticesIndices) * this->verticesIndices.size(),
+                 &this->verticesIndices[0], GL_STATIC_DRAW);
+
+    // enable vao -> vbo pointing
+    glEnableVertexAttribArray(0);
+    // setup formats of my vao attributes
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), NULL);
+
+    // useful for debugging :
+    // unbind vbo
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    // unbind vao by binding default (not usable)
+    glBindVertexArray(0);
 }
 
 void Mesh::rotate(const int x, const int y, const int z)
