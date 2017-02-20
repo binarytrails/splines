@@ -104,20 +104,29 @@ void Mesh::render(const Window* window,
     glUniformMatrix4fv(
         projLoc, 1, GL_FALSE,
         glm::value_ptr(this->projection));
-
-    /* TODO move to draw
-    // draw triangle
-    glBindVertexArray(this->vaoId);
-    //glDrawArrays(renderMode, 0, mesh->vertices.size()); // without EBO
-    glDrawElements(renderMode, this->verticesIndices.size(),
-                   GL_UNSIGNED_SHORT, 0);
-    glBindVertexArray(0);
-    */
 }
 
 void Mesh::addVertex(const glm::vec3 v)
 {
     this->vertices.push_back(v);
+
+    // update vbo
+    glBindBuffer(GL_ARRAY_BUFFER, this->vboId);
+    glBufferData(GL_ARRAY_BUFFER,
+                 sizeof(glm::vec3) * this->vertices.size(),
+                 &this->vertices[0], GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+void Mesh::drawVertices()
+{
+    glBindVertexArray(this->vaoId);
+    // window EBO
+    glDrawArrays(renderMode, 0, this->vertices.size());
+    // with EBO
+    //glDrawElements(renderMode, this->verticesIndices.size(),
+    //               GL_UNSIGNED_SHORT, 0);
+    glBindVertexArray(0);
 }
 
 // TODO use glm:vec4 & rotate

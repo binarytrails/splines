@@ -18,8 +18,8 @@ Window* window;
 Camera* camera;
 Mesh* mesh;
 
-GLenum polygonMode = GL_TRIANGLES;
-GLenum renderMode = GL_TRIANGLES;
+GLenum polygonMode = GL_FILL;
+GLenum renderMode = GL_POINTS;
 
 bool splineInput = true;
 uint8_t splineCounter = 1;
@@ -71,12 +71,15 @@ int main(int argc,char *argv[])
         // GL_FILL [F key]; GL_LINE [L key]
         glPolygonMode(GL_FRONT_AND_BACK, polygonMode);
 
+        /*
         if (mesh->getRenderMode() != renderMode)
         {
             mesh->genVerticesIndices(renderMode);
         }
+        */
 
         mesh->render(window, camera);
+        mesh->drawVertices();
 
         // swap the screen buffers
         glfwSwapBuffers(window->get());
@@ -175,6 +178,7 @@ void mouse_key_callback(GLFWwindow* w, int key,
 
         glm::vec3 p;
 
+        // TODO normalize EVERYTHING
         if (splineCounter == 1 && splineInput)
         {
             p.x = (GLfloat) cursorX;

@@ -42,6 +42,9 @@ class Mesh
                     const Camera* camera);
 
         void addVertex(const glm::vec3 v);
+
+        void drawVertices();
+
         void genVerticesIndices(const GLenum renderMode);
 
         void sweep();
