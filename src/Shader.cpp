@@ -80,7 +80,7 @@ Shader::Shader(const GLchar* vertexPath, const GLchar* fragmentPath)
 }
 
 // Uses the current shader
-void Shader::Use() 
-{ 
-    glUseProgram(this->ProgramId); 
+void Shader::use()
+{
+    glUseProgram(this->ProgramId);
 }

@@ -16,5 +16,5 @@ class Shader
         Shader(const GLchar* vertexPath,
                const GLchar* fragmentPath);
         
-        void Use();
+        void use();
 };

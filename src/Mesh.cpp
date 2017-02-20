@@ -4,9 +4,13 @@ Mesh::Mesh()
 {
     this->vertices.clear();
     this->verticesIndices.clear();
+    this->shader = new Shader(
+        "src/shaders/default.vs",
+        "src/shaders/default.fs");
 }
 
-Mesh::Mesh(const std::string filepath)
+Mesh::Mesh(const std::string filepath) :
+    Mesh()
 {
     this->inputFilepath = filepath;
     this->readInput();
@@ -15,18 +19,20 @@ Mesh::Mesh(const std::string filepath)
 
 Mesh::~Mesh()
 {
+    glDeleteVertexArrays(1, &this->vaoId);
+    glDeleteBuffers(1, &this->vboId);
 }
 
 void Mesh::initBuffers()
 {
-
     glGenBuffers(1, &this->vboId);
     glGenVertexArrays(1, &this->vaoId);
     glGenBuffers(1, &this->eboId);
 
     glBindBuffer(GL_ARRAY_BUFFER, this->vboId);
     glBufferData(GL_ARRAY_BUFFER,
-                 sizeof(glm::vec3) * this->vertices.size(),
+                 sizeof(glm::vec3) *
+                    this->vertices.size(),
                  &this->vertices[0], GL_STATIC_DRAW);
 
     // has to be before ebo bind
@@ -34,19 +40,74 @@ void Mesh::initBuffers()
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->eboId);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-                 sizeof(this->verticesIndices) * this->verticesIndices.size(),
-                 &this->verticesIndices[0], GL_STATIC_DRAW);
+                 sizeof(this->verticesIndices) *
+                    this->verticesIndices.size(),
+                 &this->verticesIndices[0],
+                 GL_STATIC_DRAW);
 
     // enable vao -> vbo pointing
     glEnableVertexAttribArray(0);
     // setup formats of my vao attributes
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), NULL);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
+                          sizeof(glm::vec3), NULL);
 
     // useful for debugging :
     // unbind vbo
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     // unbind vao by binding default (not usable)
     glBindVertexArray(0);
+}
+
+void Mesh::render(const Window* window,
+                  const Camera* camera)
+{
+    this->shader->use();
+
+    // update coordinate system
+    this->model = glm::rotate(this->model,
+                        this->xAngle,
+                        glm::vec3(1.0f, 0.0f, 0.0f));
+    this->model = glm::rotate(this->model,
+                        this->yAngle,
+                        glm::vec3(0.0f, 1.0f, 0.0f));
+
+    this->view = glm::translate(
+        camera->view(),
+        glm::vec3(0.0f, 0.0f, -3.0f));
+
+    this->projection = glm::perspective(
+        45.0f,
+        ((GLfloat) window->width() /
+         (GLfloat) window->height()),
+        0.1f,
+        100.0f
+    );
+
+    // locate
+    GLint modelLoc = glGetUniformLocation(
+            this->shader->ProgramId, "model");
+    GLint viewLoc = glGetUniformLocation(
+            this->shader->ProgramId, "view");
+    GLint projLoc = glGetUniformLocation(
+            this->shader->ProgramId, "projection");
+
+    // send to shaders
+    glUniformMatrix4fv(
+        modelLoc, 1, GL_FALSE, glm::value_ptr(this->model));
+    glUniformMatrix4fv(
+        viewLoc, 1, GL_FALSE, glm::value_ptr(this->view));
+    glUniformMatrix4fv(
+        projLoc, 1, GL_FALSE,
+        glm::value_ptr(this->projection));
+
+    /*
+    // draw triangle
+    glBindVertexArray(this->vaoId);
+    //glDrawArrays(renderMode, 0, mesh->vertices.size()); // without EBO
+    glDrawElements(renderMode, this->verticesIndices.size(),
+                   GL_UNSIGNED_SHORT, 0);
+    glBindVertexArray(0);
+    */
 }
 
 void Mesh::rotate(const int x, const int y, const int z)
