@@ -1,3 +1,8 @@
+/*
+ * @file
+ * @author Vsevolod (Seva) Ivanov
+*/
+
 #pragma once
 
 #include <stdio.h>

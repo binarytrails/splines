@@ -1,3 +1,8 @@
+/*
+ * @file
+ * @author Vsevolod (Seva) Ivanov
+*/
+
 #include <Mesh.hpp>
 
 Mesh::Mesh()

@@ -1,3 +1,8 @@
+/*
+ * @file
+ * @author Vsevolod (Seva) Ivanov
+*/
+
 #include <stdio.h>
 
 #include <glm/glm.hpp>

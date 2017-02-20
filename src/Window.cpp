@@ -1,3 +1,8 @@
+/*
+ * @file
+ * @author Vsevolod (Seva) Ivanov
+*/
+
 #include "Window.hpp"
 
 Window::Window(const int w, const int h,
