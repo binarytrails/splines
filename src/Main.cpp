@@ -15,11 +15,15 @@
 #include "Mesh.hpp"
 
 Window* window;
+Shader* shader;
 Camera* camera;
 Mesh* mesh;
 
 GLenum polygonMode = GL_FILL;
 GLenum renderMode = GL_POINTS;
+
+glm::mat4 view;
+glm::mat4 projection;
 
 bool splineInput = true;
 uint8_t splineCounter = 1;
@@ -57,6 +61,13 @@ int main(int argc,char *argv[])
     mesh = new Mesh();
     mesh->initBuffers();
 
+    // contrainer matrice {
+    projection = glm::perspective(
+        45.0f, (GLfloat) window->width() / (GLfloat) window->height(),
+        0.1f, 100.0f
+    );
+    // } container matrice
+
     // draw loop
     while (!glfwWindowShouldClose(window->get()))
     {
@@ -78,7 +89,11 @@ int main(int argc,char *argv[])
         }
         */
 
-        mesh->render(window, camera);
+        // contrainer matrices {
+        view = glm::translate(camera->view(), glm::vec3(0.0f, 0.0f, -3.0f));
+        // } container matrices
+
+        mesh->render(window, camera, view, projection);
         mesh->drawVertices();
 
         // swap the screen buffers
@@ -176,22 +191,31 @@ void mouse_key_callback(GLFWwindow* w, int key,
         cursorY = (double) window->height() - (GLfloat) cursorY;
         cursorX = cursorX;
 
-        glm::vec3 p;
+        glm::vec3 pos;
 
         // TODO normalize EVERYTHING
         if (splineCounter == 1 && splineInput)
         {
-            p.x = (GLfloat) cursorX;
-            p.z = (GLfloat) cursorY;
+            pos.x = (GLfloat) cursorX;
+            pos.y = 0.0f;
+            pos.z = (GLfloat) cursorY;
         }
         else if (splineCounter = 2 && splineInput)
         {
-            p.x = (GLfloat) cursorX;
-            p.y = (GLfloat) cursorY;
+            pos.x = (GLfloat) cursorX;
+            pos.y = (GLfloat) cursorY;
+            pos.z = 0.0f;
         }
-        mesh->addVertex(p);
 
-        printf("add point: (%f, %f, %f)\n", p.x, p.y, p.z);
+        printf("point window: (%f, %f, %f)\n", pos.x, pos.y, pos.z);
+
+        // FIXME transform window coordinates -> model space coordinates
+        pos = glm::project(pos, view, projection, window->viewPort());
+
+        printf("point model: (%f, %f, %f)\n", pos.x, pos.y, pos.z);
+
+        mesh->addVertex(pos);
+
         mesh->printVertices();
     }
 }

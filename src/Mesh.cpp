@@ -63,47 +63,24 @@ void Mesh::initBuffers()
     glBindVertexArray(0);
 }
 
-void Mesh::render(const Window* window,
-                  const Camera* camera)
+void Mesh::render(const Window* window, const Camera* camera,
+                  const glm::mat4 view, const glm::mat4 projection)
 {
     this->shader->use();
 
     // update coordinate system
-    this->model = glm::rotate(this->model,
-                        this->xAngle,
-                        glm::vec3(1.0f, 0.0f, 0.0f));
-    this->model = glm::rotate(this->model,
-                        this->yAngle,
-                        glm::vec3(0.0f, 1.0f, 0.0f));
+    this->model = glm::rotate(this->model, this->xAngle,
+                              glm::vec3(1.0f, 0.0f, 0.0f));
 
-    this->view = glm::translate(
-        camera->view(),
-        glm::vec3(0.0f, 0.0f, -3.0f));
+    // locate on gpu
+    GLint modelLoc = glGetUniformLocation(this->shader->ProgramId, "model");
+    GLint viewLoc = glGetUniformLocation(this->shader->ProgramId, "view");
+    GLint projLoc = glGetUniformLocation(this->shader->ProgramId, "projection");
 
-    this->projection = glm::perspective(
-        45.0f,
-        ((GLfloat) window->width() /
-         (GLfloat) window->height()),
-        0.1f,
-        100.0f
-    );
-
-    // locate
-    GLint modelLoc = glGetUniformLocation(
-            this->shader->ProgramId, "model");
-    GLint viewLoc = glGetUniformLocation(
-            this->shader->ProgramId, "view");
-    GLint projLoc = glGetUniformLocation(
-            this->shader->ProgramId, "projection");
-
-    // send to shaders
-    glUniformMatrix4fv(
-        modelLoc, 1, GL_FALSE, glm::value_ptr(this->model));
-    glUniformMatrix4fv(
-        viewLoc, 1, GL_FALSE, glm::value_ptr(this->view));
-    glUniformMatrix4fv(
-        projLoc, 1, GL_FALSE,
-        glm::value_ptr(this->projection));
+    // send to shaders to gpu
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(this->model));
+    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+    glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 }
 
 void Mesh::addVertex(const glm::vec3 v)

@@ -47,6 +47,11 @@ void Window::width(const GLuint width)
     this->WIDTH = width;
 }
 
+glm::vec4 Window::viewPort() const
+{
+    return glm::vec4(0, 0, this->WIDTH, this->HEIGHT);
+}
+
 void Window::height(const GLuint height)
 {
     this->HEIGHT = height;

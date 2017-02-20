@@ -11,6 +11,8 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+#include <glm/glm.hpp>
+
 class Window
 {
     public:
@@ -21,6 +23,7 @@ class Window
         GLFWwindow* get() const;
         GLuint height() const;
         GLuint width() const;
+        glm::vec4 viewPort() const;
 
         void height(const GLuint height);
         void width(const GLuint widht);

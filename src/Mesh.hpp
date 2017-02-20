@@ -39,7 +39,9 @@ class Mesh
         void initBuffers();
 
         void render(const Window* window,
-                    const Camera* camera);
+                    const Camera* camera,
+                    const glm::mat4 view,
+                    const glm::mat4 projection);
 
         void addVertex(const glm::vec3 v);
 
@@ -87,8 +89,6 @@ class Mesh
         std::vector<GLushort> verticesIndices;
         // coordinate system
         glm::mat4 model;
-        glm::mat4 view;
-        glm::mat4 projection;
         // used for rotation
         float angleStep = 0.1f;
         float xAngle = 0.0f;
