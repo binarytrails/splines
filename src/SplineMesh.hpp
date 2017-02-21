@@ -40,8 +40,6 @@ class SplineMesh : public Mesh
         SplineMesh(const std::string filepath);
         ~SplineMesh();
 
-        void initBuffers();
-
         GLenum getRenderMode() const;
         void setRenderMode(const GLenum renderMode);
 
@@ -68,6 +66,8 @@ class SplineMesh : public Mesh
         void printVerticesIndices() const;
 
     private:
+        void initBuffers();
+
         void extractInputFileData();
 
         void formatVerticesForVBO(

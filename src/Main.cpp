@@ -55,7 +55,6 @@ int main(int argc,char *argv[])
     glViewport(0, 0, window->width(), window->height());
 
     mesh = new SplineMesh();
-    mesh->initBuffers();
     mesh->setRenderMode(GL_POINTS);
     mesh->setDrawStage(SplineMesh::DrawStage::ONE);
 

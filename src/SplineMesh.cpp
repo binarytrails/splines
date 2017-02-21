@@ -12,6 +12,7 @@ SplineMesh::SplineMesh()
     this->shader = new Shader(
         "src/shaders/default.vs",
         "src/shaders/default.fs");
+    this->initBuffers();
 }
 
 SplineMesh::SplineMesh(const std::string filepath) :
