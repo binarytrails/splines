@@ -131,6 +131,16 @@ void key_callback(GLFWwindow* w, int key, int scancode,
         glfwSetWindowShouldClose(w, GL_TRUE);
     }
 
+    if (key == GLFW_KEY_ENTER && action == GLFW_PRESS)
+    {
+        if (splineCounter == 2)
+        {
+            splineInput = false;
+        }
+        splineCounter = 2;
+    }
+
+    /* if mesh is build
 	if (key == GLFW_KEY_LEFT)
     {
 		mesh->rotate(0, 1, 0);
@@ -180,13 +190,14 @@ void key_callback(GLFWwindow* w, int key, int scancode,
 		polygonMode = GL_FILL;
         renderMode = GL_TRIANGLES;
     }
+    */
 }
 
 void mouse_key_callback(GLFWwindow* w, int key,
                         int action, int mode)
 {
     if (key == GLFW_MOUSE_BUTTON_LEFT &&
-        action == GLFW_PRESS)
+        action == GLFW_PRESS && splineInput)
     {
         double cursorX, cursorY;
         glfwGetCursorPos(window->get(),
@@ -198,29 +209,25 @@ void mouse_key_callback(GLFWwindow* w, int key,
 
         glm::vec3 pos;
 
-        // TODO normalize EVERYTHING
-        if (splineCounter == 1 && splineInput)
+        if (splineCounter == 1)
         {
             pos.x = (GLfloat) cursorX;
             pos.y = 0.0f;
             pos.z = (GLfloat) cursorY;
         }
-        else if (splineCounter = 2 && splineInput)
+        else if (splineCounter == 2)
         {
             pos.x = (GLfloat) cursorX;
             pos.y = (GLfloat) cursorY;
             pos.z = 0.0f;
         }
 
+        /* transform window coordinates -> model space coordinates
+         * ahem.. no need for orthographic?
+         */
+        //glm::vec3 pos = glm::project(pos, view, projection, window->viewPort());
         printf("point window: (%f, %f, %f)\n", pos.x, pos.y, pos.z);
 
-        // FIXME transform window coordinates -> model space coordinates
-        pos = glm::project(pos, view, projection, window->viewPort());
-
-        printf("point model: (%f, %f, %f)\n", pos.x, pos.y, pos.z);
-
         mesh->addVertex(pos);
-
-        //mesh->printVertices();
     }
 }
