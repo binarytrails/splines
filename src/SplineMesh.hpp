@@ -26,8 +26,9 @@
 #include "Window.hpp"
 #include "Shader.hpp"
 #include "Camera.hpp"
+#include "Mesh.hpp"
 
-class SplineMesh
+class SplineMesh : public Mesh
 {
     public:
 
