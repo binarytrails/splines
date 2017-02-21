@@ -73,62 +73,41 @@ void SplineMesh::setRenderMode(const GLenum renderMode)
     this->renderMode = renderMode;
 }
 
+SplineMesh::DrawStage SplineMesh::getDrawStage() const
+{
+    return this->drawStage;
+}
+
+void SplineMesh::setDrawStage(const SplineMesh::DrawStage drawStage)
+{
+    this->drawStage = drawStage;
+}
+
 void SplineMesh::render(const Window* window, const Camera* camera,
                   const glm::mat4 view, const glm::mat4 projection)
 {
     this->shader->use();
 
-    // update coordinate system
+    // update coordinate system model view
     this->model = glm::rotate(this->model, this->xAngle,
                               glm::vec3(1.0f, 0.0f, 0.0f));
 
-    // locate on gpu
+    // locate in shaders gpu
     GLint modelLoc = glGetUniformLocation(this->shader->ProgramId, "model");
     GLint viewLoc = glGetUniformLocation(this->shader->ProgramId, "view");
     GLint projLoc = glGetUniformLocation(this->shader->ProgramId, "projection");
 
-    // send to shaders to gpu
+    // send to shaders on gpu
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(this->model));
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 }
 
-void SplineMesh::addVertex(const glm::vec3 vertex,
-                           const SplineMesh::DrawStage drawStage)
+void SplineMesh::draw()
 {
-    std::vector<glm::vec3> *vertices;
-
-    switch (drawStage)
-    {
-        case (SplineMesh::DrawStage::ONE):
-            vertices = &this->profileVertices;
-            break;
-
-        case (SplineMesh::DrawStage::TWO):
-            vertices = &this->trajectoryVertices;
-            break;
-
-        case (SplineMesh::DrawStage::THREE):
-            vertices = &this->vertices;
-            break;
-    }
-    vertices->push_back(vertex);
-
-    // update vbo
-    glBindBuffer(GL_ARRAY_BUFFER, this->vboId);
-    glBufferData(GL_ARRAY_BUFFER,
-                 sizeof(glm::vec3) * vertices->size(),
-                 &vertices->at(0), GL_STATIC_DRAW);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    //delete vertices; FIXME it is too late tonight
-}
-
-void SplineMesh::drawVertices(const SplineMesh::DrawStage drawStage)
-{
-    // upload to gpu
+    // connect to vao & draw vertices
     glBindVertexArray(this->vaoId);
-        switch (drawStage)
+        switch (this->drawStage)
         {
             case (SplineMesh::DrawStage::ONE):
                 glDrawArrays(this->renderMode, 0,
@@ -145,7 +124,39 @@ void SplineMesh::drawVertices(const SplineMesh::DrawStage drawStage)
                                GL_UNSIGNED_SHORT, 0);
                 break;
         }
+    // disonnect vao by binding to default
     glBindVertexArray(0);
+}
+
+void SplineMesh::addVertex(const glm::vec3 vertex)
+{
+    std::vector<glm::vec3> *vertices;
+
+    switch (this->drawStage)
+    {
+        case (SplineMesh::DrawStage::ONE):
+            vertices = &this->profileVertices;
+            break;
+
+        case (SplineMesh::DrawStage::TWO):
+            vertices = &this->trajectoryVertices;
+            break;
+
+        case (SplineMesh::DrawStage::THREE):
+            vertices = &this->vertices;
+            break;
+    }
+    vertices->push_back(vertex);
+
+    // connect & upload to vbo
+    glBindBuffer(GL_ARRAY_BUFFER, this->vboId);
+        glBufferData(GL_ARRAY_BUFFER,
+                     sizeof(glm::vec3) * vertices->size(),
+                     &vertices->at(0), GL_STATIC_DRAW);
+    // disconnect vbo by binding to default
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    //delete vertices; FIXME it is too late tonight
 }
 
 // TODO use glm:vec4 & rotate

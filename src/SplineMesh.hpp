@@ -44,15 +44,17 @@ class SplineMesh
         GLenum getRenderMode() const;
         void setRenderMode(const GLenum renderMode);
 
+        DrawStage getDrawStage() const;
+        void setDrawStage(const DrawStage drawStage);
+
         void render(const Window* window,
                     const Camera* camera,
                     const glm::mat4 view,
                     const glm::mat4 projection);
 
-        void addVertex(const glm::vec3 vertex,
-                       const DrawStage drawStage);
+        void draw();
 
-        void drawVertices(const DrawStage drawStage);
+        void addVertex(const glm::vec3 vertex);
 
         void genVerticesIndices();
 
@@ -81,6 +83,7 @@ class SplineMesh
         Shader* shader;
         GLuint vboId, vaoId, eboId;
         GLenum renderMode;
+        DrawStage drawStage;
         std::string inputFilepath;
         // input file type (false = rotational)
         bool translationalSweep = false;

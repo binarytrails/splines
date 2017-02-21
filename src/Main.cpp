@@ -24,9 +24,6 @@ GLenum polygonMode = GL_FILL;
 glm::mat4 view;
 glm::mat4 projection;
 
-bool splineInput = true;
-SplineMesh::DrawStage drawStage = SplineMesh::DrawStage::ONE;
-
 // Callbacks
 void key_callback(GLFWwindow* w, int key, int scancode, int action, int mode);
 
@@ -60,6 +57,7 @@ int main(int argc,char *argv[])
     mesh = new SplineMesh();
     mesh->initBuffers();
     mesh->setRenderMode(GL_POINTS);
+    mesh->setDrawStage(SplineMesh::DrawStage::ONE);
 
     // contrainer matrice {
     projection = glm::ortho(0.0f, (GLfloat) window->width(),
@@ -99,7 +97,7 @@ int main(int argc,char *argv[])
         // } container matrices
 
         mesh->render(window, camera, view, projection);
-        mesh->drawVertices(drawStage);
+        mesh->draw();
 
         // swap the screen buffers
         glfwSwapBuffers(window->get());
@@ -133,19 +131,18 @@ void key_callback(GLFWwindow* w, int key, int scancode,
 
     if (key == GLFW_KEY_ENTER && action == GLFW_PRESS)
     {
-        switch (drawStage)
+        switch (mesh->getDrawStage())
         {
             case SplineMesh::DrawStage::ONE:
-                drawStage = SplineMesh::DrawStage::TWO;
+                mesh->setDrawStage(SplineMesh::DrawStage::TWO);
                 break;
 
             case SplineMesh::DrawStage::TWO:
-                drawStage = SplineMesh::DrawStage::THREE;
-                splineInput = false;
+                mesh->setDrawStage(SplineMesh::DrawStage::THREE);
                 break;
         }
     }
-	if (drawStage == SplineMesh::DrawStage::THREE)
+	if (mesh->getDrawStage() == SplineMesh::DrawStage::THREE)
     {
         if (key == GLFW_KEY_LEFT)
         {
@@ -203,7 +200,8 @@ void mouse_key_callback(GLFWwindow* w, int key,
                         int action, int mode)
 {
     if (key == GLFW_MOUSE_BUTTON_LEFT &&
-        action == GLFW_PRESS && splineInput)
+        action == GLFW_PRESS &&
+        mesh->getDrawStage() != SplineMesh::DrawStage::THREE)
     {
         double cursorX, cursorY;
         glfwGetCursorPos(window->get(),
@@ -215,13 +213,13 @@ void mouse_key_callback(GLFWwindow* w, int key,
 
         glm::vec3 pos;
 
-        if (drawStage == SplineMesh::DrawStage::ONE)
+        if (mesh->getDrawStage() == SplineMesh::DrawStage::ONE)
         {
             pos.x = (GLfloat) cursorX;
             pos.y = 0.0f;
             pos.z = (GLfloat) cursorY;
         }
-        else if (drawStage == SplineMesh::DrawStage::TWO)
+        else if (mesh->getDrawStage() == SplineMesh::DrawStage::TWO)
         {
             pos.x = (GLfloat) cursorX;
             pos.y = (GLfloat) cursorY;
@@ -234,6 +232,6 @@ void mouse_key_callback(GLFWwindow* w, int key,
         //glm::vec3 pos = glm::project(pos, view, projection, window->viewPort());
         printf("point window: (%f, %f, %f)\n", pos.x, pos.y, pos.z);
 
-        mesh->addVertex(pos, drawStage);
+        mesh->addVertex(pos);
     }
 }
