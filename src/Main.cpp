@@ -12,21 +12,20 @@
 #include "Window.hpp"
 #include "Shader.hpp"
 #include "Camera.hpp"
-#include "Mesh.hpp"
+#include "SplineMesh.hpp"
 
 Window* window;
 Shader* shader;
 Camera* camera;
-Mesh* mesh;
+SplineMesh* mesh;
 
 GLenum polygonMode = GL_FILL;
-GLenum renderMode = GL_POINTS;
 
 glm::mat4 view;
 glm::mat4 projection;
 
 bool splineInput = true;
-uint8_t splineCounter = 1;
+SplineMesh::DrawStage drawStage = SplineMesh::DrawStage::ONE;
 
 // Callbacks
 void key_callback(GLFWwindow* w, int key, int scancode, int action, int mode);
@@ -58,8 +57,9 @@ int main(int argc,char *argv[])
 
     glViewport(0, 0, window->width(), window->height());
 
-    mesh = new Mesh();
+    mesh = new SplineMesh();
     mesh->initBuffers();
+    mesh->setRenderMode(GL_POINTS);
 
     // contrainer matrice {
     projection = glm::ortho(0.0f, (GLfloat) window->width(),
@@ -99,7 +99,7 @@ int main(int argc,char *argv[])
         // } container matrices
 
         mesh->render(window, camera, view, projection);
-        mesh->drawVertices();
+        mesh->drawVertices(drawStage);
 
         // swap the screen buffers
         glfwSwapBuffers(window->get());
@@ -133,64 +133,70 @@ void key_callback(GLFWwindow* w, int key, int scancode,
 
     if (key == GLFW_KEY_ENTER && action == GLFW_PRESS)
     {
-        if (splineCounter == 2)
+        switch (drawStage)
         {
-            splineInput = false;
+            case SplineMesh::DrawStage::ONE:
+                drawStage = SplineMesh::DrawStage::TWO;
+                break;
+
+            case SplineMesh::DrawStage::TWO:
+                drawStage = SplineMesh::DrawStage::THREE;
+                splineInput = false;
+                break;
         }
-        splineCounter = 2;
     }
+	if (drawStage == SplineMesh::DrawStage::THREE)
+    {
+        if (key == GLFW_KEY_LEFT)
+        {
+            mesh->rotate(0, 1, 0);
+        }
+        if (key == GLFW_KEY_RIGHT)
+        {
+            mesh->rotate(0, -1, 0);
+        }
+        if (key == GLFW_KEY_UP)
+        {
+            mesh->rotate(1, 0, 0);
+        }
+        if (key == GLFW_KEY_DOWN)
+        {
+            mesh->rotate(-1, 0, 0);
+        }
 
-    /* if mesh is build
-	if (key == GLFW_KEY_LEFT)
-    {
-		mesh->rotate(0, 1, 0);
-    }
-    if (key == GLFW_KEY_RIGHT)
-    {
-		mesh->rotate(0, -1, 0);
-    }
-    if (key == GLFW_KEY_UP)
-    {
-		mesh->rotate(1, 0, 0);
-    }
-	if (key == GLFW_KEY_DOWN)
-    {
-		mesh->rotate(-1, 0, 0);
-    }
+        if (key == GLFW_KEY_W)
+        {
+            camera->moveForward();
+        }
+        if (key == GLFW_KEY_S)
+        {
+            camera->moveBackward();
+        }
+        if (key == GLFW_KEY_A)
+        {
+            camera->moveLeft();
+        }
+        if (key == GLFW_KEY_D)
+        {
+            camera->moveRight();
+        }
 
-    if (key == GLFW_KEY_W)
-    {
-        camera->moveForward();
+        if (key == GLFW_KEY_L)
+        {
+            polygonMode = GL_LINE;
+            mesh->setRenderMode(GL_TRIANGLES); // FIXME cheat for lines effect
+        }
+        if (key == GLFW_KEY_P)
+        {
+            polygonMode = GL_FILL;
+            mesh->setRenderMode(GL_POINTS);
+        }
+        if (key == GLFW_KEY_T)
+        {
+            polygonMode = GL_FILL;
+            mesh->setRenderMode(GL_TRIANGLES);
+        }
     }
-    if (key == GLFW_KEY_S)
-    {
-        camera->moveBackward();
-    }
-    if (key == GLFW_KEY_A)
-    {
-        camera->moveLeft();
-    }
-    if (key == GLFW_KEY_D)
-    {
-        camera->moveRight();
-    }
-
-    if (key == GLFW_KEY_L)
-    {
-		polygonMode = GL_LINE;
-        renderMode = GL_TRIANGLES; // FIXME cheatcode
-    }
-    if (key == GLFW_KEY_P)
-    {
-		polygonMode = GL_FILL;
-        renderMode = GL_POINTS;
-    }
-    if (key == GLFW_KEY_T)
-    {
-		polygonMode = GL_FILL;
-        renderMode = GL_TRIANGLES;
-    }
-    */
 }
 
 void mouse_key_callback(GLFWwindow* w, int key,
@@ -209,13 +215,13 @@ void mouse_key_callback(GLFWwindow* w, int key,
 
         glm::vec3 pos;
 
-        if (splineCounter == 1)
+        if (drawStage == SplineMesh::DrawStage::ONE)
         {
             pos.x = (GLfloat) cursorX;
             pos.y = 0.0f;
             pos.z = (GLfloat) cursorY;
         }
-        else if (splineCounter == 2)
+        else if (drawStage == SplineMesh::DrawStage::TWO)
         {
             pos.x = (GLfloat) cursorX;
             pos.y = (GLfloat) cursorY;
@@ -228,6 +234,6 @@ void mouse_key_callback(GLFWwindow* w, int key,
         //glm::vec3 pos = glm::project(pos, view, projection, window->viewPort());
         printf("point window: (%f, %f, %f)\n", pos.x, pos.y, pos.z);
 
-        mesh->addVertex(pos);
+        mesh->addVertex(pos, drawStage);
     }
 }
