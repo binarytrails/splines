@@ -62,10 +62,15 @@ int main(int argc,char *argv[])
     mesh->initBuffers();
 
     // contrainer matrice {
+    projection = glm::ortho(0.0f, (GLfloat) window->width(),
+                            0.0f, (GLfloat) window->height(),
+                            0.1f, 100.0f);
+    /*
     projection = glm::perspective(
         45.0f, (GLfloat) window->width() / (GLfloat) window->height(),
         0.1f, 100.0f
     );
+    */
     // } container matrice
 
     // draw loop
@@ -216,6 +221,6 @@ void mouse_key_callback(GLFWwindow* w, int key,
 
         mesh->addVertex(pos);
 
-        mesh->printVertices();
+        //mesh->printVertices();
     }
 }
