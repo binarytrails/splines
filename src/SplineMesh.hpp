@@ -51,8 +51,6 @@ class SplineMesh : public Mesh
                     const glm::mat4 view,
                     const glm::mat4 projection);
 
-        void draw();
-
         void addVertex(const glm::vec3 vertex);
 
         void genVerticesIndices();
@@ -81,6 +79,8 @@ class SplineMesh : public Mesh
 
         void pushVertices(std::vector<glm::vec3> v);
 
+        void draw();
+
         Shader* shader;
         GLuint vboId, vaoId, eboId;
         GLenum renderMode;
@@ -95,9 +95,11 @@ class SplineMesh : public Mesh
         // polylines of input file
         std::vector<glm::vec3> profileVertices;
         std::vector<glm::vec3> trajectoryVertices;
-        // mesh vertex data
+        // mesh vertices data
         std::vector<glm::vec3> vertices;
         std::vector<GLushort> verticesIndices;
+        // vertices for display arrangement
+        std::vector<glm::vec3> formattedVertices;
         // coordinate system
         glm::mat4 model;
         // used for rotation

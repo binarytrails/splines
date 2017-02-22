@@ -102,6 +102,8 @@ void SplineMesh::render(const Window* window, const Camera* camera,
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(this->model));
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
+    this->draw();
 }
 
 void SplineMesh::draw()
@@ -112,7 +114,7 @@ void SplineMesh::draw()
         {
             case (SplineMesh::DrawStage::ONE):
                 glDrawArrays(this->renderMode, 0,
-                             this->profileVertices.size());
+                             this->formattedVertices.size());
                 break;
 
             case (SplineMesh::DrawStage::TWO):
@@ -121,7 +123,7 @@ void SplineMesh::draw()
                 break;
 
             case (SplineMesh::DrawStage::THREE):
-                glDrawElements(renderMode, this->vertices.size(),
+                glDrawElements(renderMode, this->verticesIndices.size(),
                                GL_UNSIGNED_SHORT, 0);
                 break;
         }
@@ -131,12 +133,17 @@ void SplineMesh::draw()
 
 void SplineMesh::addVertex(const glm::vec3 vertex)
 {
+    glm::vec3 draw_vertex = vertex;
     std::vector<glm::vec3> *vertices;
 
     switch (this->drawStage)
     {
         case (SplineMesh::DrawStage::ONE):
-            vertices = &this->profileVertices;
+            // push real data
+            this->profileVertices.push_back(vertex);
+            // arrange for display by swapping y <-> z
+            draw_vertex = glm::vec3(vertex.x, vertex.z, vertex.y);
+            vertices = &this->formattedVertices;
             break;
 
         case (SplineMesh::DrawStage::TWO):
@@ -147,7 +154,7 @@ void SplineMesh::addVertex(const glm::vec3 vertex)
             vertices = &this->vertices;
             break;
     }
-    vertices->push_back(vertex);
+    vertices->push_back(draw_vertex);
 
     // connect & upload to vbo
     glBindBuffer(GL_ARRAY_BUFFER, this->vboId);
@@ -156,8 +163,6 @@ void SplineMesh::addVertex(const glm::vec3 vertex)
                      &vertices->at(0), GL_STATIC_DRAW);
     // disconnect vbo by binding to default
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    //delete vertices; FIXME it is too late tonight
 }
 
 // TODO use glm:vec4 & rotate

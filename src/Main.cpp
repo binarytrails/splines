@@ -96,7 +96,6 @@ int main(int argc,char *argv[])
         // } container matrices
 
         mesh->render(window, camera, view, projection);
-        mesh->draw();
 
         // swap the screen buffers
         glfwSwapBuffers(window->get());
