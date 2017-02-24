@@ -3,9 +3,9 @@
  * @author Vsevolod (Seva) Ivanov
 */
 
-#include <SplineMesh.hpp>
+#include <Spline.hpp>
 
-SplineMesh::SplineMesh()
+Spline::Spline()
 {
     this->dataModel = new DataModel();
     this->dataModel->vertices.clear();
@@ -18,15 +18,15 @@ SplineMesh::SplineMesh()
     this->initBuffers();
 }
 
-SplineMesh::SplineMesh(const std::string filepath) :
-    SplineMesh()
+Spline::Spline(const std::string filepath) :
+    Spline()
 {
     this->dataModel->setFilepath(filepath);
     this->dataModel->loadInputFile();
     this->sweep();
 }
 
-SplineMesh::~SplineMesh()
+Spline::~Spline()
 {
     delete this->dataModel;
     glDeleteVertexArrays(1, &this->vaoId);
@@ -34,17 +34,17 @@ SplineMesh::~SplineMesh()
 }
 
 
-DataModel::SweepType SplineMesh::getSweepType() const
+DataModel::SweepType Spline::getSweepType() const
 {
     return this->dataModel->getSweepType();
 }
 
-void SplineMesh::setSweepType(DataModel::SweepType sweepType)
+void Spline::setSweepType(DataModel::SweepType sweepType)
 {
     this->dataModel->setSweepType(sweepType);
 }
 
-void SplineMesh::initBuffers()
+void Spline::initBuffers()
 {
     glGenBuffers(1, &this->vboId);
     glGenVertexArrays(1, &this->vaoId);
@@ -79,27 +79,27 @@ void SplineMesh::initBuffers()
     glBindVertexArray(0);
 }
 
-GLenum SplineMesh::getRenderMode() const
+GLenum Spline::getRenderMode() const
 {
     return this->renderMode;
 }
 
-void SplineMesh::setRenderMode(const GLenum renderMode)
+void Spline::setRenderMode(const GLenum renderMode)
 {
     this->renderMode = renderMode;
 }
 
-SplineMesh::DrawStage SplineMesh::getDrawStage() const
+Spline::DrawStage Spline::getDrawStage() const
 {
     return this->drawStage;
 }
 
-void SplineMesh::setDrawStage(const SplineMesh::DrawStage drawStage)
+void Spline::setDrawStage(const Spline::DrawStage drawStage)
 {
     this->drawStage = drawStage;
 }
 
-void SplineMesh::render(const Window* window, const Camera* camera,
+void Spline::render(const Window* window, const Camera* camera,
                   const glm::mat4 view, const glm::mat4 projection)
 {
     this->shader->use();
@@ -121,23 +121,23 @@ void SplineMesh::render(const Window* window, const Camera* camera,
     this->draw();
 }
 
-void SplineMesh::draw()
+void Spline::draw()
 {
     // connect to vao & draw vertices
     glBindVertexArray(this->vaoId);
         switch (this->drawStage)
         {
-            case (SplineMesh::DrawStage::ONE):
+            case (Spline::DrawStage::ONE):
                 glDrawArrays(this->renderMode, 0,
                              this->formattedVertices.size());
                 break;
 
-            case (SplineMesh::DrawStage::TWO):
+            case (Spline::DrawStage::TWO):
                 glDrawArrays(this->renderMode, 0,
                              this->dataModel->trajectoryVertices.size());
                 break;
 
-            case (SplineMesh::DrawStage::THREE):
+            case (Spline::DrawStage::THREE):
                 glDrawElements(renderMode,
                                this->verticesIndices.size(),
                                GL_UNSIGNED_SHORT, 0);
@@ -147,14 +147,14 @@ void SplineMesh::draw()
     glBindVertexArray(0);
 }
 
-void SplineMesh::addVertex(const glm::vec3 vertex)
+void Spline::addVertex(const glm::vec3 vertex)
 {
     glm::vec3 draw_vertex = vertex;
     std::vector<glm::vec3> *vertices;
 
     switch (this->drawStage)
     {
-        case (SplineMesh::DrawStage::ONE):
+        case (Spline::DrawStage::ONE):
             // push real data
             this->dataModel->profileVertices.push_back(vertex);
             // arrange for display by swapping y <-> z
@@ -162,11 +162,11 @@ void SplineMesh::addVertex(const glm::vec3 vertex)
             vertices = &this->formattedVertices;
             break;
 
-        case (SplineMesh::DrawStage::TWO):
+        case (Spline::DrawStage::TWO):
             vertices = &this->dataModel->trajectoryVertices;
             break;
 
-        case (SplineMesh::DrawStage::THREE):
+        case (Spline::DrawStage::THREE):
             vertices = &this->dataModel->vertices;
             break;
     }
@@ -182,7 +182,7 @@ void SplineMesh::addVertex(const glm::vec3 vertex)
 }
 
 // TODO use glm:vec4 & rotate
-void SplineMesh::rotate(const int x, const int y, const int z)
+void Spline::rotate(const int x, const int y, const int z)
 {
     //printf("x: %i  y: %i  z: %i\n", x, y, z);
 
@@ -206,7 +206,7 @@ void SplineMesh::rotate(const int x, const int y, const int z)
     }
 }
 
-void SplineMesh::sweep()
+void Spline::sweep()
 {
     if (this->dataModel->getSweepType() == DataModel::SweepType::Translational)
     {
@@ -258,7 +258,7 @@ void SplineMesh::sweep()
     }
 }
 
-void SplineMesh::genVerticesIndices()
+void Spline::genVerticesIndices()
 {
     // TODO reduce number of vertices depending in renderMode
     // if (renderMode == GL_TRIANGLES)
@@ -300,7 +300,7 @@ void SplineMesh::genVerticesIndices()
 }
 
 // FIXME dead code with ebo
-void SplineMesh::formatVerticesForVBO(std::vector<glm::vec3> p1,
+void Spline::formatVerticesForVBO(std::vector<glm::vec3> p1,
                                 std::vector<glm::vec3> p2)
 {
     for (uint16_t i = 0; i < this->dataModel->profileVertices.size() - 1; i++)
@@ -316,7 +316,7 @@ void SplineMesh::formatVerticesForVBO(std::vector<glm::vec3> p1,
     }
 }
 
-std::vector<glm::vec3> SplineMesh::translateProfileCurve(
+std::vector<glm::vec3> Spline::translateProfileCurve(
     std::vector<glm::vec3> p, glm::vec3 t)
 {
     std::vector<glm::vec3> new_p;
@@ -334,7 +334,7 @@ std::vector<glm::vec3> SplineMesh::translateProfileCurve(
     return new_p;
 }
 
-void SplineMesh::pushVertices(std::vector<glm::vec3> vec)
+void Spline::pushVertices(std::vector<glm::vec3> vec)
 {
     for (const auto& v: vec)
     {
@@ -342,7 +342,7 @@ void SplineMesh::pushVertices(std::vector<glm::vec3> vec)
     }
 }
 
-void SplineMesh::printVertices() const
+void Spline::printVertices() const
 {
     for(auto const& v: this->dataModel->vertices)
     {
@@ -351,7 +351,7 @@ void SplineMesh::printVertices() const
     printf("\n");
 }
 
-void SplineMesh::printVerticesIndices() const
+void Spline::printVerticesIndices() const
 {
     for(uint16_t i = 0; i < this->verticesIndices.size(); i++)
     {

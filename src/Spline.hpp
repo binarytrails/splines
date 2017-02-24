@@ -25,7 +25,7 @@
 #include "Mesh.hpp"
 #include "DataModel.hpp"
 
-class SplineMesh : public Mesh
+class Spline : public Mesh
 {
     public:
 
@@ -33,9 +33,9 @@ class SplineMesh : public Mesh
             ONE, TWO, THREE
         };
 
-        SplineMesh();
-        SplineMesh(const std::string filepath);
-        ~SplineMesh();
+        Spline();
+        Spline(const std::string filepath);
+        ~Spline();
 
         DataModel::SweepType getSweepType() const;
         void setSweepType(DataModel::SweepType type);

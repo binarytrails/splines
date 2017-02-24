@@ -13,12 +13,12 @@
 #include "Window.hpp"
 #include "Shader.hpp"
 #include "Camera.hpp"
-#include "SplineMesh.hpp"
+#include "Spline.hpp"
 
 Window* window;
 Shader* shader;
 Camera* camera;
-SplineMesh* mesh;
+Spline* mesh;
 
 GLenum polygonMode = GL_FILL;
 
@@ -85,10 +85,10 @@ int main(int argc,char *argv[])
 
     glViewport(0, 0, window->width(), window->height());
 
-    mesh = new SplineMesh();
+    mesh = new Spline();
     mesh->setSweepType(sweepType);
     mesh->setRenderMode(GL_POINTS);
-    mesh->setDrawStage(SplineMesh::DrawStage::ONE);
+    mesh->setDrawStage(Spline::DrawStage::ONE);
 
     // contrainer matrice {
     projection = glm::ortho(0.0f, (GLfloat) window->width(),
@@ -163,16 +163,16 @@ void key_callback(GLFWwindow* w, int key, int scancode,
     {
         switch (mesh->getDrawStage())
         {
-            case SplineMesh::DrawStage::ONE:
-                mesh->setDrawStage(SplineMesh::DrawStage::TWO);
+            case Spline::DrawStage::ONE:
+                mesh->setDrawStage(Spline::DrawStage::TWO);
                 break;
 
-            case SplineMesh::DrawStage::TWO:
-                mesh->setDrawStage(SplineMesh::DrawStage::THREE);
+            case Spline::DrawStage::TWO:
+                mesh->setDrawStage(Spline::DrawStage::THREE);
                 break;
         }
     }
-	if (mesh->getDrawStage() == SplineMesh::DrawStage::THREE)
+	if (mesh->getDrawStage() == Spline::DrawStage::THREE)
     {
         if (key == GLFW_KEY_LEFT)
         {
@@ -231,7 +231,7 @@ void mouse_key_callback(GLFWwindow* w, int key,
 {
     if (key == GLFW_MOUSE_BUTTON_LEFT &&
         action == GLFW_PRESS &&
-        mesh->getDrawStage() != SplineMesh::DrawStage::THREE)
+        mesh->getDrawStage() != Spline::DrawStage::THREE)
     {
         double cursorX, cursorY;
         glfwGetCursorPos(window->get(),
@@ -243,13 +243,13 @@ void mouse_key_callback(GLFWwindow* w, int key,
 
         glm::vec3 pos;
 
-        if (mesh->getDrawStage() == SplineMesh::DrawStage::ONE)
+        if (mesh->getDrawStage() == Spline::DrawStage::ONE)
         {
             pos.x = (GLfloat) cursorX;
             pos.y = 0.0f;
             pos.z = (GLfloat) cursorY;
         }
-        else if (mesh->getDrawStage() == SplineMesh::DrawStage::TWO)
+        else if (mesh->getDrawStage() == Spline::DrawStage::TWO)
         {
             pos.x = (GLfloat) cursorX;
             pos.y = (GLfloat) cursorY;
