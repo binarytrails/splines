@@ -7,26 +7,41 @@
 
 SplineMesh::SplineMesh()
 {
-    this->vertices.clear();
+    this->dataModel = new DataModel();
+    this->dataModel->vertices.clear();
     this->verticesIndices.clear();
+
     this->shader = new Shader(
         "src/shaders/default.vs",
         "src/shaders/default.fs");
+
     this->initBuffers();
 }
 
 SplineMesh::SplineMesh(const std::string filepath) :
     SplineMesh()
 {
-    this->inputFilepath = filepath;
-    this->extractInputFileData();
+    this->dataModel->setFilepath(filepath);
+    this->dataModel->loadInputFile();
     this->sweep();
 }
 
 SplineMesh::~SplineMesh()
 {
+    delete this->dataModel;
     glDeleteVertexArrays(1, &this->vaoId);
     glDeleteBuffers(1, &this->vboId);
+}
+
+
+DataModel::SweepType SplineMesh::getSweepType() const
+{
+    return this->dataModel->getSweepType();
+}
+
+void SplineMesh::setSweepType(DataModel::SweepType sweepType)
+{
+    this->dataModel->setSweepType(sweepType);
 }
 
 void SplineMesh::initBuffers()
@@ -38,8 +53,8 @@ void SplineMesh::initBuffers()
     glBindBuffer(GL_ARRAY_BUFFER, this->vboId);
     glBufferData(GL_ARRAY_BUFFER,
                  sizeof(glm::vec3) *
-                    this->vertices.size(),
-                 &this->vertices[0], GL_STATIC_DRAW);
+                    this->dataModel->vertices.size(),
+                 &this->dataModel->vertices[0], GL_STATIC_DRAW);
 
     // has to be before ebo bind
     glBindVertexArray(this->vaoId);
@@ -62,16 +77,6 @@ void SplineMesh::initBuffers()
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     // unbind vao by binding default (not usable)
     glBindVertexArray(0);
-}
-
-SplineMesh::SweepType SplineMesh::getSweepType() const
-{
-    return this->sweepType;
-}
-
-void SplineMesh::setSweepType(SplineMesh::SweepType sweepType)
-{
-    this->sweepType = sweepType;
 }
 
 GLenum SplineMesh::getRenderMode() const
@@ -129,11 +134,12 @@ void SplineMesh::draw()
 
             case (SplineMesh::DrawStage::TWO):
                 glDrawArrays(this->renderMode, 0,
-                             this->trajectoryVertices.size());
+                             this->dataModel->trajectoryVertices.size());
                 break;
 
             case (SplineMesh::DrawStage::THREE):
-                glDrawElements(renderMode, this->verticesIndices.size(),
+                glDrawElements(renderMode,
+                               this->verticesIndices.size(),
                                GL_UNSIGNED_SHORT, 0);
                 break;
         }
@@ -150,18 +156,18 @@ void SplineMesh::addVertex(const glm::vec3 vertex)
     {
         case (SplineMesh::DrawStage::ONE):
             // push real data
-            this->profileVertices.push_back(vertex);
+            this->dataModel->profileVertices.push_back(vertex);
             // arrange for display by swapping y <-> z
             draw_vertex = glm::vec3(vertex.x, vertex.z, vertex.y);
             vertices = &this->formattedVertices;
             break;
 
         case (SplineMesh::DrawStage::TWO):
-            vertices = &this->trajectoryVertices;
+            vertices = &this->dataModel->trajectoryVertices;
             break;
 
         case (SplineMesh::DrawStage::THREE):
-            vertices = &this->vertices;
+            vertices = &this->dataModel->vertices;
             break;
     }
     vertices->push_back(draw_vertex);
@@ -200,65 +206,20 @@ void SplineMesh::rotate(const int x, const int y, const int z)
     }
 }
 
-void SplineMesh::extractInputFileData()
-{
-	GLfloat x, y, z;
-    short choice;
-
-    std::ifstream ifs;
-    ifs.open(this->inputFilepath);
-
-	if (ifs.is_open())
-	{
-		ifs >> choice;
-
-        if (choice == 0) // transitional
-		{
-            this->setSweepType(SplineMesh::SweepType::Translational);
-			ifs >> this->profilePoints;
-
-            for(unsigned int i = 0; i < this->profilePoints; i++)
-			{
-				ifs >> x >> y >> z;
-                this->profileVertices.push_back(glm::vec3(x, y, z));
-			}
-
-			ifs >> this->trajectoryPoints;
-
-            for(unsigned int i = 0; i < this->trajectoryPoints; i++)
-			{
-					ifs >> x >> y >> z;
-					this->trajectoryVertices.push_back(glm::vec3(x, y, z));
-			}
-		}
-		else // rotational
-		{
-			ifs >> this->spans;
-			ifs >> this->profilePoints;
-
-			for(unsigned int i = 0; i < this->profilePoints; i++)
-			{
-				ifs >> x >> y >> z;
-				vertices.push_back(glm::vec3(x, y, z));
-			}
-		}
-    }
-    ifs.close();
-}
-
 void SplineMesh::sweep()
 {
-    if (this->getSweepType() == SplineMesh::SweepType::Translational)
+    if (this->dataModel->getSweepType() == DataModel::SweepType::Translational)
     {
-        std::vector<glm::vec3> p1 = this->profileVertices;
+        std::vector<glm::vec3> p1 = this->dataModel->profileVertices;
         std::vector<glm::vec3> p2;
-        std::vector<glm::vec3> t = this->trajectoryVertices;
+        std::vector<glm::vec3> t = this->dataModel->trajectoryVertices;
 
-        this->vertices.clear();
+        this->dataModel->vertices.clear();
         this->pushVertices(p1);
 
         // for n translation <=> n new profile curves
-        for (unsigned int i = 0; i < this->trajectoryVertices.size(); i++)
+        for (uint16_t i = 0;
+             i < this->dataModel->trajectoryVertices.size(); i++)
         {
 
             // get translation vector from t_i+1 - t_i
@@ -278,18 +239,20 @@ void SplineMesh::sweep()
     else
     {
         // remove radians for artsy shapes
-        GLfloat angle = 360.0f / this->spans;
+        GLfloat angle = 360.0f / this->dataModel->spans;
 
-        for(unsigned int s = 0; s < this->spans; s++)
+        for(uint16_t s = 0; s < this->dataModel->spans; s++)
         {
             // rotateCurve
-            for(unsigned int p = 0; p < this->profilePoints; p++)
+            for(uint16_t p = 0; p < this->dataModel->profilePoints; p++)
             {
-                glm::vec3 p1 = this->vertices[p + (s * this->profilePoints)];
+                glm::vec3 p1 = this->dataModel->vertices[
+                    p + (s * this->dataModel->profilePoints)
+                ];
 
                 glm::vec3 p2 = glm::rotateZ(p1, angle);
 
-                this->vertices.push_back(p2);
+                this->dataModel->vertices.push_back(p2);
             }
         }
     }
@@ -300,28 +263,28 @@ void SplineMesh::genVerticesIndices()
     // TODO reduce number of vertices depending in renderMode
     // if (renderMode == GL_TRIANGLES)
 
-    unsigned int sweeps;
+    uint16_t sweeps;
 
-    if (this->getSweepType() == SplineMesh::SweepType::Translational)
+    if (this->dataModel->getSweepType() == DataModel::SweepType::Translational)
     {
-        sweeps = this->trajectoryPoints;
+        sweeps = this->dataModel->trajectoryPoints;
     }
     else
     {
-        sweeps = this->spans;
+        sweeps = this->dataModel->spans;
     }
 
     this->verticesIndices.clear();
 
-    unsigned int p1, p2;
+    uint16_t p1, p2;
 
     // translational & rotational
-    for (unsigned int s = 0; s < sweeps; s++)
+    for (uint16_t s = 0; s < sweeps; s++)
     {
-        for (unsigned int p = 0; p < this->profilePoints - 1; p++)
+        for (uint16_t p = 0; p < this->dataModel->profilePoints - 1; p++)
         {
-            p1 = p + this->profilePoints * s;
-            p2 = p + this->profilePoints * (s + 1);
+            p1 = p + this->dataModel->profilePoints * s;
+            p2 = p + this->dataModel->profilePoints * (s + 1);
 
             // Triangle 1
             this->verticesIndices.push_back(p1);
@@ -340,16 +303,16 @@ void SplineMesh::genVerticesIndices()
 void SplineMesh::formatVerticesForVBO(std::vector<glm::vec3> p1,
                                 std::vector<glm::vec3> p2)
 {
-    for (unsigned int i = 0; i < this->profileVertices.size() - 1; i++)
+    for (uint16_t i = 0; i < this->dataModel->profileVertices.size() - 1; i++)
     {
         // Triangle 1
-        this->vertices.push_back(p1[i]);
-        this->vertices.push_back(p1[i+1]);
-        this->vertices.push_back(p2[i]);
+        this->dataModel->vertices.push_back(p1[i]);
+        this->dataModel->vertices.push_back(p1[i+1]);
+        this->dataModel->vertices.push_back(p2[i]);
         // Triangle 2
-        this->vertices.push_back(p1[i+1]);
-        this->vertices.push_back(p2[i]);
-        this->vertices.push_back(p2[i+1]);
+        this->dataModel->vertices.push_back(p1[i+1]);
+        this->dataModel->vertices.push_back(p2[i]);
+        this->dataModel->vertices.push_back(p2[i+1]);
     }
 }
 
@@ -371,46 +334,17 @@ std::vector<glm::vec3> SplineMesh::translateProfileCurve(
     return new_p;
 }
 
-void SplineMesh::printInputData() const
-{
-    std::cout << "Profile points: " <<
-                 this->profileVertices.size() << std::endl <<
-                 "Profile vertices: " << std::endl;
-
-    for(auto const& v: this->profileVertices)
-    {
-        printf("(%f, %f, %f)\n", v[0], v[1], v[2]);
-    }
-    printf("\n");
-
-    if (this->getSweepType() == SplineMesh::SweepType::Translational)
-    {
-        std::cout << "Trajectory points: " <<
-                     this->trajectoryVertices.size() << std::endl <<
-                     "Trajectory vertices: " << std::endl;
-
-        for(auto const& v: this->trajectoryVertices)
-        {
-            printf("(%f, %f, %f)\n", v[0], v[1], v[2]);
-        }
-    }
-    else
-    {
-        std::cout << "Spans number: " << this->spans << std::endl;
-    }
-}
-
 void SplineMesh::pushVertices(std::vector<glm::vec3> vec)
 {
     for (const auto& v: vec)
     {
-        this->vertices.push_back(v);
+        this->dataModel->vertices.push_back(v);
     }
 }
 
 void SplineMesh::printVertices() const
 {
-    for(auto const& v: this->vertices)
+    for(auto const& v: this->dataModel->vertices)
     {
         printf("(%f, %f, %f)\n", v[0], v[1], v[2]);
     }
@@ -419,7 +353,7 @@ void SplineMesh::printVertices() const
 
 void SplineMesh::printVerticesIndices() const
 {
-    for(unsigned int i = 0; i < this->verticesIndices.size(); i++)
+    for(uint16_t i = 0; i < this->verticesIndices.size(); i++)
     {
         if (i % 3 == 0)
         {

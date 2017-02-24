@@ -10,11 +10,6 @@
 #include <vector>
 #include <string>
 
-#include <iterator>
-#include <fstream>
-#include <iostream>
-#include <sstream>
-
 #include <GL/glew.h>
 
 #include <math.h>
@@ -26,15 +21,14 @@
 #include "Window.hpp"
 #include "Shader.hpp"
 #include "Camera.hpp"
+
 #include "Mesh.hpp"
+#include "DataModel.hpp"
 
 class SplineMesh : public Mesh
 {
     public:
 
-        enum SweepType {
-            Rotational, Translational
-        };
         enum DrawStage {
             ONE, TWO, THREE
         };
@@ -43,8 +37,8 @@ class SplineMesh : public Mesh
         SplineMesh(const std::string filepath);
         ~SplineMesh();
 
-        SweepType getSweepType() const;
-        void setSweepType(SweepType type);
+        DataModel::SweepType getSweepType() const;
+        void setSweepType(DataModel::SweepType type);
 
         GLenum getRenderMode() const;
         void setRenderMode(const GLenum renderMode);
@@ -65,14 +59,13 @@ class SplineMesh : public Mesh
 
         void rotate(const int x, const int y, const int z);
 
-        void printInputData() const;
         void printVertices() const;
         void printVerticesIndices() const;
 
     private:
         void initBuffers();
 
-        void extractInputFileData();
+        //void extractInputFileData();
 
         void formatVerticesForVBO(
             std::vector<glm::vec3> p1,
@@ -87,21 +80,13 @@ class SplineMesh : public Mesh
 
         void draw();
 
-        Shader* shader;
+        Shader *shader;
         GLuint vboId, vaoId, eboId;
         GLenum renderMode;
         DrawStage drawStage;
-        std::string inputFilepath;
-        SweepType sweepType;
-        // input file params
-        unsigned int profilePoints = 0;
-        unsigned int trajectoryPoints = 0;
-        unsigned int spans = 0;
-        // polylines of input file
-        std::vector<glm::vec3> profileVertices;
-        std::vector<glm::vec3> trajectoryVertices;
+        // in/output file data
+        DataModel *dataModel;
         // mesh vertices data
-        std::vector<glm::vec3> vertices;
         std::vector<GLushort> verticesIndices;
         // vertices for display arrangement
         std::vector<glm::vec3> formattedVertices;

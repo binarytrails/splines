@@ -25,7 +25,7 @@ GLenum polygonMode = GL_FILL;
 glm::mat4 view;
 glm::mat4 projection;
 
-SplineMesh::SweepType sweepType;
+DataModel::SweepType sweepType;
 
 // Callbacks
 void key_callback(GLFWwindow* w, int key, int scancode, int action, int mode);
@@ -50,12 +50,12 @@ int main(int argc,char *argv[])
             {
                 case 'R':
                 case 'r':
-                    sweepType = SplineMesh::SweepType::Rotational;
+                    sweepType = DataModel::SweepType::Rotational;
                     chosen = true;
                     break;
                 case 'T':
                 case 't':
-                    sweepType = SplineMesh::SweepType::Translational;
+                    sweepType = DataModel::SweepType::Translational;
                     chosen = true;
                     break;
             }
