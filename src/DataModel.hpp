@@ -10,7 +10,7 @@
 
 #include <fstream>
 #include <iostream>
-#include <sstream>
+//#include <sstream>
 
 #include <vector>
 
@@ -21,7 +21,8 @@ class DataModel
 {
     public:
         enum SweepType {
-            Rotational, Translational
+            Translational = 0,
+            Rotational = 1
         };
 
         DataModel();
@@ -33,6 +34,9 @@ class DataModel
         void setFilepath(const std::string filepath);
 
         void loadInputFile();
+        bool saveNumber(const uint16_t number);
+        bool saveVertices(const std::vector<glm::vec3> vertices);
+
         void printInput();
 
         std::string filepath;

@@ -34,40 +34,45 @@ void mouse_key_callback(GLFWwindow* w, int key, int action, int mode);
 
 void framebuffer_size_callback(GLFWwindow* w, int width, int height);
 
+void shellMenu()
+{
+    char choice;
+    bool chosen = false;
+
+    while (!chosen)
+    {
+        std::cout << "[R]otational || [T]ransation? ";
+        std::cin >> choice;
+
+        switch (choice)
+        {
+            case 'R':
+            case 'r':
+                sweepType = DataModel::SweepType::Rotational;
+                chosen = true;
+                break;
+            case 'T':
+            case 't':
+                sweepType = DataModel::SweepType::Translational;
+                chosen = true;
+                break;
+        }
+        if (chosen)
+            break;
+        std::cout << "\n";
+    }
+}
+
 int main(int argc,char *argv[])
 {
-    if (argc == 1)
+    if (argc < 2)
     {
-        char choice;
-        bool chosen = false;
-
-        while (!chosen)
-        {
-            std::cout << "[R]otational || [T]ransation? ";
-            std::cin >> choice;
-
-            switch (choice)
-            {
-                case 'R':
-                case 'r':
-                    sweepType = DataModel::SweepType::Rotational;
-                    chosen = true;
-                    break;
-                case 'T':
-                case 't':
-                    sweepType = DataModel::SweepType::Translational;
-                    chosen = true;
-                    break;
-            }
-            if (chosen)
-                break;
-            std::cout << "\n";
-        }
+        std::cout << "You did not provide any in/output file.." << std::endl;
+        return 1;
     }
-    else if (argc == 2)
-    {
-        // input file
-    }
+
+    shellMenu();
+    std::string filepath = argv[1];
 
     camera = new Camera();
     window = new Window(800, 800, "Splines - Assignment 2");
@@ -85,7 +90,7 @@ int main(int argc,char *argv[])
 
     glViewport(0, 0, window->width(), window->height());
 
-    mesh = new Spline();
+    mesh = new Spline(filepath);
     mesh->setSweepType(sweepType);
     mesh->setRenderMode(GL_POINTS);
     mesh->setDrawStage(Spline::DrawStage::ONE);

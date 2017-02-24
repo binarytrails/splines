@@ -74,6 +74,49 @@ void DataModel::loadInputFile()
     ifs.close();
 }
 
+bool DataModel::saveNumber(const uint16_t number)
+{
+    std::ofstream ofs;
+    ofs.open(this->filepath);
+
+    if (!ofs.is_open())
+	{
+        return false;
+    }
+
+    std::string snumber = std::to_string(number);
+    ofs.write(snumber.c_str(), 1);
+    ofs.close();
+
+    return true;
+}
+
+bool DataModel::saveVertices(const std::vector<glm::vec3> vertices)
+{
+    std::ofstream ofs;
+    ofs.open(this->filepath);
+
+    if (!ofs.is_open())
+	{
+        return false;
+    }
+
+    for (auto const &vertex: vertices)
+    {
+        // TODO wip
+        //ofs << vertex.x << std::endl
+        /*
+        ofs.write((char *) &value.x, sizeof(GLfloat));
+        ofs.write((char *) &value.y, sizeof(GLfloat));
+        ofs.write((char *) &value.z, sizeof(GLfloat));
+        ofs.write("\n", 1);
+        */
+    }
+    ofs.close();
+
+    return true;
+}
+
 void DataModel::printInput()
 {
     std::cout << "Profile points: " <<

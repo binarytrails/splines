@@ -96,6 +96,32 @@ Spline::DrawStage Spline::getDrawStage() const
 
 void Spline::setDrawStage(const Spline::DrawStage drawStage)
 {
+    DataModel::SweepType sweepType = this->dataModel->getSweepType();
+
+    // use DrawStage before update
+    if (drawStage == Spline::DrawStage::ONE)
+    {
+        // save type
+        this->dataModel->saveNumber((int)sweepType);
+        // save profile vertices
+        this->dataModel->saveVertices(this->dataModel->profileVertices);
+    }
+    else if (drawStage == Spline::DrawStage::TWO)
+    {
+        if (sweepType == DataModel::SweepType::Translational)
+        {
+            // save translational vertices
+            //this->dataModel->saveVertices(
+            //    this->dataModel->translationalVertices);
+        }
+        else if (sweepType == DataModel::SweepType::Rotational)
+        {
+            // save rotational number of spans
+            //this->dataModel->saveVertices(
+            //    this->dataModel->rotationalVertices);
+        }
+    }
+    // update to new DrawStage
     this->drawStage = drawStage;
 }
 
