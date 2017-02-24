@@ -8,9 +8,9 @@ Generating 3d shapes by drawing splines and using them for translational or rota
 
 #### Requierements
 
-* User decides whether to have a translational “T” or rotational sweep “R” (through console)
+* ~~User decides whether to have a translational “T” or rotational sweep “R” (through console)~~
 
-* The user then marks control points in the window with the mouse (assume XZ plane, Y=0). The X and Z coordinates of each point should then relate to the window coordinates where the user has clicked.
+* ~~The user then marks control points in the window with the mouse (assume XZ plane, Y=0). The X and Z coordinates of each point should then relate to the window coordinates where the user has clicked.~~
 
 * User can then press “Enter” which computes and draws the spline.
     
@@ -26,7 +26,7 @@ Generating 3d shapes by drawing splines and using them for translational or rota
 
 * ~~The application should handle window resize events~~
 
-* Use an orthographic projection for simplicity
+* ~~Use an orthographic projection for simplicity~~
 
 * Use the subdivision technique presented in class for drawing the spline
 

@@ -4,6 +4,7 @@
 */
 
 #include <stdio.h>
+#include <iostream>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -24,6 +25,8 @@ GLenum polygonMode = GL_FILL;
 glm::mat4 view;
 glm::mat4 projection;
 
+SplineMesh::SweepType sweepType;
+
 // Callbacks
 void key_callback(GLFWwindow* w, int key, int scancode, int action, int mode);
 
@@ -33,13 +36,41 @@ void framebuffer_size_callback(GLFWwindow* w, int width, int height);
 
 int main(int argc,char *argv[])
 {
-    // input file
-    if (argc == 2)
+    if (argc == 1)
     {
+        char choice;
+        bool chosen = false;
+
+        while (!chosen)
+        {
+            std::cout << "[R]otational || [T]ransation? ";
+            std::cin >> choice;
+
+            switch (choice)
+            {
+                case 'R':
+                case 'r':
+                    sweepType = SplineMesh::SweepType::Rotational;
+                    chosen = true;
+                    break;
+                case 'T':
+                case 't':
+                    sweepType = SplineMesh::SweepType::Translational;
+                    chosen = true;
+                    break;
+            }
+            if (chosen)
+                break;
+            std::cout << "\n";
+        }
+    }
+    else if (argc == 2)
+    {
+        // input file
     }
 
     camera = new Camera();
-    window = new Window(800, 800, "Assignment 1");
+    window = new Window(800, 800, "Splines - Assignment 2");
 
     // FIXME move into window but allow them to access mesh?
     glfwSetKeyCallback(window->get(), key_callback);
@@ -55,6 +86,7 @@ int main(int argc,char *argv[])
     glViewport(0, 0, window->width(), window->height());
 
     mesh = new SplineMesh();
+    mesh->setSweepType(sweepType);
     mesh->setRenderMode(GL_POINTS);
     mesh->setDrawStage(SplineMesh::DrawStage::ONE);
 

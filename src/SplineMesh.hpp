@@ -32,6 +32,9 @@ class SplineMesh : public Mesh
 {
     public:
 
+        enum SweepType {
+            Rotational, Translational
+        };
         enum DrawStage {
             ONE, TWO, THREE
         };
@@ -39,6 +42,9 @@ class SplineMesh : public Mesh
         SplineMesh();
         SplineMesh(const std::string filepath);
         ~SplineMesh();
+
+        SweepType getSweepType() const;
+        void setSweepType(SweepType type);
 
         GLenum getRenderMode() const;
         void setRenderMode(const GLenum renderMode);
@@ -86,8 +92,7 @@ class SplineMesh : public Mesh
         GLenum renderMode;
         DrawStage drawStage;
         std::string inputFilepath;
-        // input file type (false = rotational)
-        bool translationalSweep = false;
+        SweepType sweepType;
         // input file params
         unsigned int profilePoints = 0;
         unsigned int trajectoryPoints = 0;

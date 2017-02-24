@@ -64,6 +64,16 @@ void SplineMesh::initBuffers()
     glBindVertexArray(0);
 }
 
+SplineMesh::SweepType SplineMesh::getSweepType() const
+{
+    return this->sweepType;
+}
+
+void SplineMesh::setSweepType(SplineMesh::SweepType sweepType)
+{
+    this->sweepType = sweepType;
+}
+
 GLenum SplineMesh::getRenderMode() const
 {
     return this->renderMode;
@@ -204,7 +214,7 @@ void SplineMesh::extractInputFileData()
 
         if (choice == 0) // transitional
 		{
-            this->translationalSweep = true;
+            this->setSweepType(SplineMesh::SweepType::Translational);
 			ifs >> this->profilePoints;
 
             for(unsigned int i = 0; i < this->profilePoints; i++)
@@ -238,7 +248,7 @@ void SplineMesh::extractInputFileData()
 
 void SplineMesh::sweep()
 {
-    if (this->translationalSweep)
+    if (this->getSweepType() == SplineMesh::SweepType::Translational)
     {
         std::vector<glm::vec3> p1 = this->profileVertices;
         std::vector<glm::vec3> p2;
@@ -292,7 +302,7 @@ void SplineMesh::genVerticesIndices()
 
     unsigned int sweeps;
 
-    if (this->translationalSweep)
+    if (this->getSweepType() == SplineMesh::SweepType::Translational)
     {
         sweeps = this->trajectoryPoints;
     }
@@ -373,7 +383,7 @@ void SplineMesh::printInputData() const
     }
     printf("\n");
 
-    if (this->translationalSweep)
+    if (this->getSweepType() == SplineMesh::SweepType::Translational)
     {
         std::cout << "Trajectory points: " <<
                      this->trajectoryVertices.size() << std::endl <<
