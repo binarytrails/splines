@@ -18,10 +18,10 @@ Spline::Spline()
     this->initBuffers();
 }
 
-Spline::Spline(const std::string filepath) :
+Spline::Spline(const std::string filenameSuffix) :
     Spline()
 {
-    this->dataModel->setFilepath(filepath);
+    this->dataModel->setFileSuffix(filenameSuffix);
     this->dataModel->loadInputFile();
     this->sweep();
 }
@@ -96,32 +96,6 @@ Spline::DrawStage Spline::getDrawStage() const
 
 void Spline::setDrawStage(const Spline::DrawStage drawStage)
 {
-    DataModel::SweepType sweepType = this->dataModel->getSweepType();
-
-    // use DrawStage before update
-    if (drawStage == Spline::DrawStage::ONE)
-    {
-        // save type
-        this->dataModel->saveNumber((int)sweepType);
-        // save profile vertices
-        this->dataModel->saveVertices(this->dataModel->profileVertices);
-    }
-    else if (drawStage == Spline::DrawStage::TWO)
-    {
-        if (sweepType == DataModel::SweepType::Translational)
-        {
-            // save translational vertices
-            //this->dataModel->saveVertices(
-            //    this->dataModel->translationalVertices);
-        }
-        else if (sweepType == DataModel::SweepType::Rotational)
-        {
-            // save rotational number of spans
-            //this->dataModel->saveVertices(
-            //    this->dataModel->rotationalVertices);
-        }
-    }
-    // update to new DrawStage
     this->drawStage = drawStage;
 }
 
@@ -388,4 +362,27 @@ void Spline::printVerticesIndices() const
         printf("%i ", this->verticesIndices[i]);
     }
     printf("\n");
+}
+
+bool Spline::saveDataModel()
+{
+    if (this->drawStage != Spline::DrawStage::THREE)
+    {
+        return false;
+    }
+
+    DataModel::SweepType sweepType = this->dataModel->getSweepType();
+
+    this->dataModel->saveNumber(sweepType);
+    this->dataModel->saveVertices(this->dataModel->profileVertices);
+
+    if (sweepType == DataModel::SweepType::Translational)
+    {
+        this->dataModel->saveVertices(this->dataModel->trajectoryVertices);
+    }
+    else if (sweepType == DataModel::SweepType::Rotational)
+    {
+        this->dataModel->saveNumber(this->dataModel->spans);
+    }
+    return true;
 }

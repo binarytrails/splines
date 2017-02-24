@@ -10,7 +10,6 @@
 
 #include <fstream>
 #include <iostream>
-//#include <sstream>
 
 #include <vector>
 
@@ -30,16 +29,18 @@ class DataModel
 
         SweepType getSweepType() const;
         void setSweepType(SweepType sweepType);
+        std::string getSweepTypeString() const;
 
-        void setFilepath(const std::string filepath);
+        void setFileSuffix(const std::string suffix);
+        std::string getFilename() const;
 
-        void loadInputFile();
+        bool loadInputFile();
         bool saveNumber(const uint16_t number);
         bool saveVertices(const std::vector<glm::vec3> vertices);
 
         void printInput();
 
-        std::string filepath;
+        std::string fileSuffix;
         SweepType sweepType;
         uint16_t profilePoints = 0;
         uint16_t trajectoryPoints = 0;

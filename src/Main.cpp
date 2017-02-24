@@ -49,6 +49,7 @@ void shellMenu()
             case 'R':
             case 'r':
                 sweepType = DataModel::SweepType::Rotational;
+                // TODO enforce number of spans input
                 chosen = true;
                 break;
             case 'T':
@@ -169,11 +170,17 @@ void key_callback(GLFWwindow* w, int key, int scancode,
         switch (mesh->getDrawStage())
         {
             case Spline::DrawStage::ONE:
-                mesh->setDrawStage(Spline::DrawStage::TWO);
-                break;
+
+                if (mesh->getSweepType() == DataModel::SweepType::Translational)
+                {
+                    mesh->setDrawStage(Spline::DrawStage::TWO);
+                    break;
+                }
+                //else skip two for rotational
 
             case Spline::DrawStage::TWO:
                 mesh->setDrawStage(Spline::DrawStage::THREE);
+                mesh->saveDataModel();
                 break;
         }
     }
