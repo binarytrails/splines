@@ -54,6 +54,7 @@ class Spline : public Mesh
         void addVertex(const glm::vec3 vertex);
 
         void genVerticesIndices();
+        void genSpline();
 
         void sweep();
 

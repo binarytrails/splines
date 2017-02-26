@@ -27,6 +27,8 @@ glm::mat4 projection;
 
 DataModel::SweepType sweepType;
 
+uint8_t keyEnterCounter = 0;
+
 // Callbacks
 void key_callback(GLFWwindow* w, int key, int scancode, int action, int mode);
 
@@ -124,9 +126,7 @@ int main(int argc,char *argv[])
 
         /*
         if (mesh->getRenderMode() != renderMode)
-        {
             mesh->genVerticesIndices(renderMode);
-        }
         */
 
         // contrainer matrices {
@@ -167,21 +167,32 @@ void key_callback(GLFWwindow* w, int key, int scancode,
 
     if (key == GLFW_KEY_ENTER && action == GLFW_PRESS)
     {
-        switch (mesh->getDrawStage())
+        keyEnterCounter++;
+
+        if (keyEnterCounter == 1 &&
+            mesh->getDrawStage() < Spline::DrawStage::THREE)
         {
-            case Spline::DrawStage::ONE:
+            mesh->genSpline();
+        }
+        else if (keyEnterCounter == 2)
+        {
+            switch (mesh->getDrawStage())
+            {
+                case Spline::DrawStage::ONE:
 
-                if (mesh->getSweepType() == DataModel::SweepType::Translational)
-                {
-                    mesh->setDrawStage(Spline::DrawStage::TWO);
+                    if (mesh->getSweepType() == DataModel::SweepType::Translational)
+                    {
+                        mesh->setDrawStage(Spline::DrawStage::TWO);
+                        break;
+                    }
+                    //else skip stage two for rotational
+
+                case Spline::DrawStage::TWO:
+                    mesh->setDrawStage(Spline::DrawStage::THREE);
+                    mesh->saveDataModel();
                     break;
-                }
-                //else skip two for rotational
-
-            case Spline::DrawStage::TWO:
-                mesh->setDrawStage(Spline::DrawStage::THREE);
-                mesh->saveDataModel();
-                break;
+            }
+            keyEnterCounter = 0;
         }
     }
 	if (mesh->getDrawStage() == Spline::DrawStage::THREE)
@@ -243,7 +254,8 @@ void mouse_key_callback(GLFWwindow* w, int key,
 {
     if (key == GLFW_MOUSE_BUTTON_LEFT &&
         action == GLFW_PRESS &&
-        mesh->getDrawStage() != Spline::DrawStage::THREE)
+        keyEnterCounter == 0 &&
+        mesh->getDrawStage() < Spline::DrawStage::THREE)
     {
         double cursorX, cursorY;
         glfwGetCursorPos(window->get(),

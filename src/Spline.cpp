@@ -386,3 +386,8 @@ bool Spline::saveDataModel()
     }
     return true;
 }
+
+void Spline::genSpline()
+{
+    printf("Generating Spline");
+}
