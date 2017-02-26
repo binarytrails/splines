@@ -172,7 +172,8 @@ void key_callback(GLFWwindow* w, int key, int scancode,
         if (keyEnterCounter == 1 &&
             mesh->getDrawStage() < Spline::DrawStage::THREE)
         {
-            mesh->genSpline();
+            if (!mesh->genSplineCatmullRom())
+                keyEnterCounter--;
         }
         else if (keyEnterCounter == 2)
         {

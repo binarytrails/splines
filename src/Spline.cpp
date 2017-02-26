@@ -387,7 +387,58 @@ bool Spline::saveDataModel()
     return true;
 }
 
-void Spline::genSpline()
+bool Spline::genSplineCatmullRom()
 {
-    printf("Generating Spline");
+    printf("Generating Catmull-Rom Spline..\n");
+
+    std::vector<glm::vec3> vbuffer;
+    std::vector<glm::vec3> *vertices;
+
+    switch (this->drawStage)
+    {
+        case (Spline::DrawStage::ONE):
+            vertices = &this->dataModel->profileVertices;
+            break;
+
+        case (Spline::DrawStage::TWO):
+            vertices = &this->dataModel->trajectoryVertices;
+            break;
+
+        default:
+            return false;
+    }
+
+    if (vertices->size() < 4)
+    {
+        printf("A minimum of 4 points is requiered "
+               "to generate a Catmull-Rom Spline.\n");
+        return false;
+    }
+
+    glm::vec4 params;
+    glm::mat4 basis;
+    glm::mat4x3 control;
+
+    // brute force for n segments with n+3 control points
+    for (uint16_t i = 1; i < vertices->size() - 2; i++)
+    {
+        glm::vec3 p0 = vertices->at(i - 1);
+        glm::vec3 p1 = vertices->at(i);
+        glm::vec3 p2 = vertices->at(i + 1);
+        glm::vec3 p3 = vertices->at(i + 2);
+
+        printf("o(%f, %f, %f)\n", p1.x, p1.y, p1.z);
+        p1.x += 200;
+        printf("n(%f, %f, %f)\n\n", p1.x, p1.y, p1.z);
+
+        vbuffer.push_back(p1);
+    }
+
+    // push back into the proper vertices
+    for (uint16_t i = 0; i < vbuffer.size(); i++)
+    {
+        glm::vec3 vertex = vbuffer.at(i);
+        this->addVertex(vertex);
+    }
+    return true;
 }
