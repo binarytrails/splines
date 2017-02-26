@@ -18,14 +18,6 @@ Spline::Spline()
     this->initBuffers();
 }
 
-Spline::Spline(const std::string filenameSuffix) :
-    Spline()
-{
-    this->dataModel->setFileSuffix(filenameSuffix);
-    this->dataModel->loadInputFile();
-    this->sweep();
-}
-
 Spline::~Spline()
 {
     delete this->dataModel;
@@ -33,6 +25,31 @@ Spline::~Spline()
     glDeleteBuffers(1, &this->vboId);
 }
 
+bool Spline::initDataModel(const std::string fileSuffix,
+                           const bool newFile, const bool loadFile)
+{
+    this->dataModel->setFileSuffix(fileSuffix);
+
+    if (newFile)
+        this->dataModel->deleteFile();
+
+    if (loadFile)
+    {
+        this->dataModel->loadInputFile();
+    }
+    else if (this->dataModel->fileExists())
+    {
+        return false;
+    }
+
+    return true;
+}
+
+// TODO implment DataModel::getFilepath
+std::string Spline::getModelFilePath() const
+{
+    return this->dataModel->getFilename();
+}
 
 DataModel::SweepType Spline::getSweepType() const
 {

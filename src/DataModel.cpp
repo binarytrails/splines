@@ -46,6 +46,22 @@ std::string DataModel::getFilename() const
     return this->getSweepTypeString() + "_" + this->fileSuffix;
 }
 
+bool DataModel::fileExists()
+{
+    std::ifstream ifs;
+    ifs.open(this->getFilename());
+
+    bool exists = ifs.good();
+
+    ifs.close();
+    return exists;
+}
+
+void DataModel::deleteFile()
+{
+    std::remove(this->getFilename().c_str());
+}
+
 bool DataModel::loadInputFile()
 {
 	GLfloat x, y, z;

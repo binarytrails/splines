@@ -25,8 +25,6 @@ GLenum polygonMode = GL_FILL;
 glm::mat4 view;
 glm::mat4 projection;
 
-DataModel::SweepType sweepType;
-
 uint8_t keyEnterCounter = 0;
 
 // Callbacks
@@ -36,11 +34,48 @@ void mouse_key_callback(GLFWwindow* w, int key, int action, int mode);
 
 void framebuffer_size_callback(GLFWwindow* w, int width, int height);
 
-void shellMenu()
+void initApplication(const DataModel::SweepType sweepType)
+{
+    camera = new Camera();
+    window = new Window(800, 800, "Splines - Assignment 2");
+
+    // FIXME move into window but allow them to access mesh?
+    glfwSetKeyCallback(window->get(), key_callback);
+    glfwSetMouseButtonCallback(window->get(), mouse_key_callback);
+    glfwSetFramebufferSizeCallback(window->get(), framebuffer_size_callback);
+
+    glewExperimental = GL_TRUE;
+    glewInit();
+
+    glEnable(GL_PROGRAM_POINT_SIZE);
+    glEnable(GL_DEPTH_TEST);
+
+    glViewport(0, 0, window->width(), window->height());
+
+    mesh = new Spline();
+    mesh->setSweepType(sweepType);
+    mesh->setRenderMode(GL_POINTS);
+
+    // contrainer matrix {
+    projection = glm::ortho(0.0f, (GLfloat) window->width(),
+                            0.0f, (GLfloat) window->height(),
+                            0.1f, 100.0f);
+    /*
+    projection = glm::perspective(
+        45.0f, (GLfloat) window->width() / (GLfloat) window->height(),
+        0.1f, 100.0f
+    );
+    */
+    // } container matrix
+}
+
+void shellMenu(const std::string fileSuffix)
 {
     char choice;
     bool chosen = false;
+    DataModel::SweepType sweepType;
 
+    // handle sweep type
     while (!chosen)
     {
         std::cout << "[R]otational || [T]ransation? ";
@@ -62,11 +97,50 @@ void shellMenu()
         }
         if (chosen)
             break;
-        std::cout << "\n";
+        std::cout << std::endl;
+    }
+
+    chosen = false;
+    initApplication(sweepType);
+
+    // no file with the same name
+    if (mesh->initDataModel(fileSuffix, false, false))
+    {
+        mesh->setDrawStage(Spline::DrawStage::ONE);
+        return;
+    }
+
+    // handle existing file
+    while (!chosen)
+    {
+        std::cout << "File " << mesh->getModelFilePath() << " exists." <<
+                  std::endl << "Do you want to [o]verwrite it " <<
+                  "or [u]se it as input? ";
+        std::cin >> choice;
+
+        switch (choice)
+        {
+            case 'o':
+                if (mesh->initDataModel(fileSuffix, true, false))
+                    mesh->setDrawStage(Spline::DrawStage::ONE);
+                    chosen = true;
+                break;
+
+            case 'u':
+                if (mesh->initDataModel(fileSuffix, false, true))
+                    /* TODO
+                     * mesh->genSplineCatmullRom() for each stage
+                     * mesh->sweep()
+                     */
+                    mesh->setDrawStage(Spline::DrawStage::THREE);
+                    chosen = true;
+                break;
+        }
+        std::cout << std::endl;
     }
 }
 
-int main(int argc,char *argv[])
+int main(int argc, char *argv[])
 {
     if (argc < 2)
     {
@@ -74,41 +148,7 @@ int main(int argc,char *argv[])
         return 1;
     }
 
-    shellMenu();
-    std::string filepath = argv[1];
-
-    camera = new Camera();
-    window = new Window(800, 800, "Splines - Assignment 2");
-
-    // FIXME move into window but allow them to access mesh?
-    glfwSetKeyCallback(window->get(), key_callback);
-    glfwSetMouseButtonCallback(window->get(), mouse_key_callback);
-    glfwSetFramebufferSizeCallback(window->get(), framebuffer_size_callback);
-
-    glewExperimental = GL_TRUE;
-    glewInit();
-
-    glEnable(GL_PROGRAM_POINT_SIZE);
-    glEnable(GL_DEPTH_TEST);
-
-    glViewport(0, 0, window->width(), window->height());
-
-    mesh = new Spline(filepath);
-    mesh->setSweepType(sweepType);
-    mesh->setRenderMode(GL_POINTS);
-    mesh->setDrawStage(Spline::DrawStage::ONE);
-
-    // contrainer matrice {
-    projection = glm::ortho(0.0f, (GLfloat) window->width(),
-                            0.0f, (GLfloat) window->height(),
-                            0.1f, 100.0f);
-    /*
-    projection = glm::perspective(
-        45.0f, (GLfloat) window->width() / (GLfloat) window->height(),
-        0.1f, 100.0f
-    );
-    */
-    // } container matrice
+    shellMenu(argv[1]);
 
     // draw loop
     while (!glfwWindowShouldClose(window->get()))

@@ -32,7 +32,10 @@ class DataModel
         std::string getSweepTypeString() const;
 
         void setFileSuffix(const std::string suffix);
+
         std::string getFilename() const;
+        bool fileExists();
+        void deleteFile();
 
         bool loadInputFile();
         bool saveNumber(const uint16_t number);

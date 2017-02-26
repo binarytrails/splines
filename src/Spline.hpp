@@ -34,8 +34,12 @@ class Spline : public Mesh
         };
 
         Spline();
-        Spline(const std::string filenameSuffix);
         ~Spline();
+
+        bool initDataModel(const std::string fileSuffix,
+                           const bool newFile, const bool loadFile);
+        std::string getModelFilePath() const;
+        bool saveDataModel();
 
         DataModel::SweepType getSweepType() const;
         void setSweepType(DataModel::SweepType type);
@@ -62,8 +66,6 @@ class Spline : public Mesh
 
         void printVertices() const;
         void printVerticesIndices() const;
-
-        bool saveDataModel();
 
     private:
         void initBuffers();
