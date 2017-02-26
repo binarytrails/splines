@@ -36,10 +36,10 @@ class Spline : public Mesh
         Spline();
         ~Spline();
 
-        bool initDataModel(const std::string fileSuffix,
-                           const bool newFile, const bool loadFile);
-        std::string getModelFilePath() const;
-        bool saveDataModel();
+        bool initData(const std::string fileSuffix,
+                      const bool newFile, const bool loadFile);
+        std::string getDataFilePath() const;
+        bool saveData();
 
         DataModel::SweepType getSweepType() const;
         void setSweepType(DataModel::SweepType type);
@@ -56,6 +56,7 @@ class Spline : public Mesh
                     const glm::mat4 projection);
 
         void addVertex(const glm::vec3 vertex);
+        void setSpans(const uint16_t spans);
 
         void genVerticesIndices();
         bool genSplineCatmullRom();
@@ -69,8 +70,6 @@ class Spline : public Mesh
 
     private:
         void initBuffers();
-
-        //void extractInputFileData();
 
         void formatVerticesForVBO(
             std::vector<glm::vec3> p1,

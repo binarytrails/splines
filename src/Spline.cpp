@@ -25,8 +25,8 @@ Spline::~Spline()
     glDeleteBuffers(1, &this->vboId);
 }
 
-bool Spline::initDataModel(const std::string fileSuffix,
-                           const bool newFile, const bool loadFile)
+bool Spline::initData(const std::string fileSuffix,
+                      const bool newFile, const bool loadFile)
 {
     this->dataModel->setFileSuffix(fileSuffix);
 
@@ -45,8 +45,8 @@ bool Spline::initDataModel(const std::string fileSuffix,
     return true;
 }
 
-// TODO implment DataModel::getFilepath
-std::string Spline::getModelFilePath() const
+// TODO implment DataModel::getFilepath for relative path
+std::string Spline::getDataFilePath() const
 {
     return this->dataModel->getFilename();
 }
@@ -196,6 +196,11 @@ void Spline::addVertex(const glm::vec3 vertex)
                      &vertices->at(0), GL_STATIC_DRAW);
     // disconnect vbo by binding to default
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+void Spline::setSpans(const uint16_t spans)
+{
+    this->dataModel->spans = spans;
 }
 
 // TODO use glm:vec4 & rotate
@@ -381,7 +386,7 @@ void Spline::printVerticesIndices() const
     printf("\n");
 }
 
-bool Spline::saveDataModel()
+bool Spline::saveData()
 {
     if (this->drawStage != Spline::DrawStage::THREE)
     {
@@ -444,9 +449,11 @@ bool Spline::genSplineCatmullRom()
         glm::vec3 p2 = vertices->at(i + 1);
         glm::vec3 p3 = vertices->at(i + 2);
 
+        /* TODO WIP
         printf("o(%f, %f, %f)\n", p1.x, p1.y, p1.z);
-        p1.x += 200;
+        p1.x += 50;
         printf("n(%f, %f, %f)\n\n", p1.x, p1.y, p1.z);
+        */
 
         vbuffer.push_back(p1);
     }

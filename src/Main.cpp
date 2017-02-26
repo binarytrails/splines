@@ -69,10 +69,11 @@ void initApplication(const DataModel::SweepType sweepType)
     // } container matrix
 }
 
-void shellMenu(const std::string fileSuffix)
+bool shellMenu(const std::string fileSuffix)
 {
     char choice;
     bool chosen = false;
+    uint16_t spans = 0;
     DataModel::SweepType sweepType;
 
     // handle sweep type
@@ -86,9 +87,18 @@ void shellMenu(const std::string fileSuffix)
             case 'R':
             case 'r':
                 sweepType = DataModel::SweepType::Rotational;
-                // TODO enforce number of spans input
+
+                std::cout << "How many spans? ";
+                std::cin >> spans;
+                if (!spans)
+                {
+                    std::cout << "Spans should be a positive number.\n";
+                    return false;
+                }
+
                 chosen = true;
                 break;
+
             case 'T':
             case 't':
                 sweepType = DataModel::SweepType::Translational;
@@ -102,18 +112,19 @@ void shellMenu(const std::string fileSuffix)
 
     chosen = false;
     initApplication(sweepType);
+    mesh->setSpans(spans);
 
     // no file with the same name
-    if (mesh->initDataModel(fileSuffix, false, false))
+    if (mesh->initData(fileSuffix, false, false))
     {
         mesh->setDrawStage(Spline::DrawStage::ONE);
-        return;
+        return true;
     }
 
     // handle existing file
     while (!chosen)
     {
-        std::cout << "File " << mesh->getModelFilePath() << " exists." <<
+        std::cout << "File " << mesh->getDataFilePath() << " exists." <<
                   std::endl << "Do you want to [o]verwrite it " <<
                   "or [u]se it as input? ";
         std::cin >> choice;
@@ -121,23 +132,27 @@ void shellMenu(const std::string fileSuffix)
         switch (choice)
         {
             case 'o':
-                if (mesh->initDataModel(fileSuffix, true, false))
+                if (mesh->initData(fileSuffix, true, false))
                     mesh->setDrawStage(Spline::DrawStage::ONE);
                     chosen = true;
                 break;
 
             case 'u':
-                if (mesh->initDataModel(fileSuffix, false, true))
-                    /* TODO
-                     * mesh->genSplineCatmullRom() for each stage
-                     * mesh->sweep()
-                     */
+                if (mesh->initData(fileSuffix, false, true))
+                {
+                    mesh->setDrawStage(Spline::DrawStage::ONE);
+                    mesh->genSplineCatmullRom();
+                    mesh->setDrawStage(Spline::DrawStage::TWO);
+                    mesh->genSplineCatmullRom();
+                    mesh->sweep();
                     mesh->setDrawStage(Spline::DrawStage::THREE);
                     chosen = true;
+                }
                 break;
         }
         std::cout << std::endl;
     }
+    return true;
 }
 
 int main(int argc, char *argv[])
@@ -148,7 +163,8 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    shellMenu(argv[1]);
+    if (!shellMenu(argv[1]))
+        return 1;
 
     // draw loop
     while (!glfwWindowShouldClose(window->get()))
@@ -156,6 +172,14 @@ int main(int argc, char *argv[])
         glfwPollEvents();
 
         // Render
+
+        if (mesh->getDrawStage() == Spline::DrawStage::THREE)
+        {
+            projection = glm::perspective(
+                45.0f, (GLfloat) window->width() / (GLfloat) window->height(),
+                0.1f, 100.0f
+            );
+        }
 
         // clear the colorbuffer
         glClearColor(255, 255, 255, 0); // background color
@@ -230,7 +254,7 @@ void key_callback(GLFWwindow* w, int key, int scancode,
 
                 case Spline::DrawStage::TWO:
                     mesh->setDrawStage(Spline::DrawStage::THREE);
-                    mesh->saveDataModel();
+                    mesh->saveData();
                     break;
             }
             keyEnterCounter = 0;
