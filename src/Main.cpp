@@ -141,11 +141,11 @@ bool shellMenu(const std::string fileSuffix)
                 if (mesh->initData(fileSuffix, false, true))
                 {
                     mesh->setDrawStage(Spline::DrawStage::ONE);
-                    mesh->genSplineCatmullRom();
-                    mesh->setDrawStage(Spline::DrawStage::TWO);
-                    mesh->genSplineCatmullRom();
-                    mesh->sweep();
-                    mesh->setDrawStage(Spline::DrawStage::THREE);
+                    //mesh->genSplineCatmullRom();
+                    //mesh->setDrawStage(Spline::DrawStage::TWO);
+                    //mesh->genSplineCatmullRom();
+                    //mesh->sweep();
+                    //mesh->setDrawStage(Spline::DrawStage::THREE);
                     chosen = true;
                 }
                 break;
@@ -229,38 +229,46 @@ void key_callback(GLFWwindow* w, int key, int scancode,
         glfwSetWindowShouldClose(w, GL_TRUE);
     }
 
-    if (key == GLFW_KEY_ENTER && action == GLFW_PRESS)
+	if (mesh->getDrawStage() < Spline::DrawStage::THREE)
     {
-        keyEnterCounter++;
+        if (key == GLFW_KEY_ENTER && action == GLFW_PRESS)
+        {
+            keyEnterCounter++;
 
-        if (keyEnterCounter == 1 &&
-            mesh->getDrawStage() < Spline::DrawStage::THREE)
-        {
-            if (!mesh->genSplineCatmullRom())
-                keyEnterCounter--;
-        }
-        else if (keyEnterCounter == 2)
-        {
-            switch (mesh->getDrawStage())
+            if (keyEnterCounter == 1 &&
+                mesh->getDrawStage() < Spline::DrawStage::THREE)
             {
-                case Spline::DrawStage::ONE:
-
-                    if (mesh->getSweepType() == DataModel::SweepType::Translational)
-                    {
-                        mesh->setDrawStage(Spline::DrawStage::TWO);
-                        break;
-                    }
-                    //else skip stage two for rotational
-
-                case Spline::DrawStage::TWO:
-                    mesh->setDrawStage(Spline::DrawStage::THREE);
-                    mesh->saveData();
-                    break;
+                if (!mesh->genSplineCatmullRom())
+                    keyEnterCounter--;
             }
-            keyEnterCounter = 0;
+            else if (keyEnterCounter == 2)
+            {
+                switch (mesh->getDrawStage())
+                {
+                    case Spline::DrawStage::ONE:
+
+                        if (mesh->getSweepType() == DataModel::SweepType::Translational)
+                        {
+                            mesh->setDrawStage(Spline::DrawStage::TWO);
+                            break;
+                        }
+                        //else skip stage two for rotational
+
+                    case Spline::DrawStage::TWO:
+                        mesh->setDrawStage(Spline::DrawStage::THREE);
+                        mesh->saveData();
+                        break;
+                }
+                keyEnterCounter = 0;
+            }
+        }
+        if (key == GLFW_KEY_S && action == GLFW_PRESS)
+
+        {
+            mesh->genSplineCatmullRom();
         }
     }
-	if (mesh->getDrawStage() == Spline::DrawStage::THREE)
+    else if (mesh->getDrawStage() == Spline::DrawStage::THREE)
     {
         if (key == GLFW_KEY_LEFT)
         {

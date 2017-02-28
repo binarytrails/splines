@@ -413,7 +413,6 @@ bool Spline::genSplineCatmullRom()
 {
     printf("Generating Catmull-Rom Spline..\n");
 
-    std::vector<glm::vec3> vbuffer;
     std::vector<glm::vec3> *vertices;
 
     switch (this->drawStage)
@@ -437,25 +436,52 @@ bool Spline::genSplineCatmullRom()
         return false;
     }
 
-    glm::vec4 params;
-    glm::mat4 basis;
-    glm::mat4x3 control;
+    std::vector<glm::vec3> vbuffer;
 
-    // brute force for n segments with n+3 control points
+    GLfloat s = 0.5f;
+
+    glm::mat4 basis(
+        -s,     2-s,    s-2,    s,      // [0][0]-[0][3]
+        2*s,    s-3,    3-2*s,  -s,
+        -s,     0,      s,      0,
+        0,      1,      0,      0
+    );
+
+    float tmax = 10.0f;
+    float step = 1.0f / tmax;
+
+    // add artificial before first
+    vertices->insert(vertices->begin(), vertices->at(0) - step);
+    // add artificial after last
+    vertices->push_back(vertices->at(vertices->size()-1) + step);
+
+    // for n segments with n+3 control points
     for (uint16_t i = 1; i < vertices->size() - 2; i++)
     {
-        glm::vec3 p0 = vertices->at(i - 1);
-        glm::vec3 p1 = vertices->at(i);
-        glm::vec3 p2 = vertices->at(i + 1);
-        glm::vec3 p3 = vertices->at(i + 2);
+        // brute force (for n segments)
+        for (float t = 0.0f; t < 1.0f - step; t += step)
+        {
+            glm::vec3 p0 = vertices->at(i - 1);
+            glm::vec3 p1 = vertices->at(i);
+            glm::vec3 p2 = vertices->at(i + 1);
+            glm::vec3 p3 = vertices->at(i + 2);
 
-        /* TODO WIP
-        printf("o(%f, %f, %f)\n", p1.x, p1.y, p1.z);
-        p1.x += 50;
-        printf("n(%f, %f, %f)\n\n", p1.x, p1.y, p1.z);
-        */
+            glm::vec4 params = glm::vec4(t*t*t, t*t, t, 1.0f);
 
-        vbuffer.push_back(p1);
+            glm::mat4x3 control(p0, p1, p2, p3);
+
+            /* operations order:
+             *      mat4 * vec4 -> vec4 is column vector
+             *      vec4 * mat4 -> vec4 is row vector
+             */
+
+            glm::vec3 pn = params * (
+                    glm::transpose(basis) * glm::transpose(control)
+            );
+            //printf("\n p_%i t=%f (%f, %f, %f)\n\n", i, t, pn.x, pn.y, pn.z);
+
+            vbuffer.push_back(pn);
+        }
     }
 
     // push back into the proper vertices
