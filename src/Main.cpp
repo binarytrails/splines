@@ -267,6 +267,16 @@ void key_callback(GLFWwindow* w, int key, int scancode,
         {
             mesh->genSplineCatmullRom();
         }
+        if (key == GLFW_KEY_LEFT && action == GLFW_PRESS)
+        {
+            uint8_t s = (uint8_t) mesh->getDrawStage();
+            mesh->setDrawStage(static_cast<Spline::DrawStage>((s - 1) % 2));
+        }
+        if (key == GLFW_KEY_RIGHT && action == GLFW_PRESS)
+        {
+            uint8_t s = (uint8_t) mesh->getDrawStage();
+            mesh->setDrawStage(static_cast<Spline::DrawStage>((s + 1) % 2));
+        }
     }
     else if (mesh->getDrawStage() == Spline::DrawStage::THREE)
     {
@@ -342,7 +352,7 @@ glm::vec3 getScreenCoordinates(const bool normalize)
             pos = glm::vec3(
                 pos.x = npos.x,
                 0.0f,
-                // manually forcing it
+                // FIXME manually forcing it
                 -1 * (1.0 - (2.0 * pos.z) / window->height())
             );
         }
