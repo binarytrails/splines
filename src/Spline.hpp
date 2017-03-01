@@ -55,7 +55,14 @@ class Spline : public Mesh
                     const glm::mat4 view,
                     const glm::mat4 projection);
 
-        void addVertex(const glm::vec3 vertex);
+        std::vector<glm::vec3>* getDataVertices();
+        std::vector<glm::vec3>* getDrawVertices();
+
+        void addDataVertex(const glm::vec3 normalizedVertex);
+        void addDrawVertex(const glm::vec3 vertex);
+
+        void uploadVertices();
+
         void setSpans(const uint16_t spans);
 
         void genVerticesIndices();
@@ -90,10 +97,11 @@ class Spline : public Mesh
         DrawStage drawStage;
         // in/output file data
         DataModel *dataModel;
-        // mesh vertices data
         std::vector<GLushort> verticesIndices;
-        // vertices for display arrangement
-        std::vector<glm::vec3> formattedVertices;
+        // splines over data
+        std::vector<glm::vec3> splineOne;
+        std::vector<glm::vec3> splineTwo;
+        std::vector<glm::vec3> splinesSweep;
         // coordinate system
         glm::mat4 model;
         // used for rotation

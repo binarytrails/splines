@@ -5,6 +5,7 @@
 
 #include <stdio.h>
 #include <iostream>
+#include <assert.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -238,7 +239,9 @@ void key_callback(GLFWwindow* w, int key, int scancode,
             if (keyEnterCounter == 1 &&
                 mesh->getDrawStage() < Spline::DrawStage::THREE)
             {
-                if (!mesh->genSplineCatmullRom())
+                if (mesh->genSplineCatmullRom())
+                    mesh->uploadVertices();
+                else
                     keyEnterCounter--;
             }
             else if (keyEnterCounter == 2)
@@ -250,6 +253,7 @@ void key_callback(GLFWwindow* w, int key, int scancode,
                         if (mesh->getSweepType() == DataModel::SweepType::Translational)
                         {
                             mesh->setDrawStage(Spline::DrawStage::TWO);
+                            mesh->uploadVertices();
                             break;
                         }
                         //else skip stage two for rotational
@@ -257,6 +261,7 @@ void key_callback(GLFWwindow* w, int key, int scancode,
                     case Spline::DrawStage::TWO:
                         mesh->setDrawStage(Spline::DrawStage::THREE);
                         mesh->saveData();
+                        mesh->uploadVertices();
                         break;
                 }
                 keyEnterCounter = 0;
@@ -270,12 +275,16 @@ void key_callback(GLFWwindow* w, int key, int scancode,
         if (key == GLFW_KEY_LEFT && action == GLFW_PRESS)
         {
             uint8_t s = (uint8_t) mesh->getDrawStage();
-            mesh->setDrawStage(static_cast<Spline::DrawStage>((s - 1) % 2));
+            mesh->setDrawStage(
+                static_cast<Spline::DrawStage>(abs((s - 1) % 2))
+            );
+            mesh->uploadVertices();
         }
         if (key == GLFW_KEY_RIGHT && action == GLFW_PRESS)
         {
             uint8_t s = (uint8_t) mesh->getDrawStage();
             mesh->setDrawStage(static_cast<Spline::DrawStage>((s + 1) % 2));
+            mesh->uploadVertices();
         }
     }
     else if (mesh->getDrawStage() == Spline::DrawStage::THREE)
@@ -408,10 +417,22 @@ void mouse_key_callback(GLFWwindow* w, int key,
         // reverse normalized test
         glm::vec3 rpos = normalizedToScreenCoordinates(npos);
 
+        /* FIXME looses floating precision
+        assert(pos.x == rpos.x);
+        assert(pos.y == rpos.y);
+        assert(pos.z == rpos.z);
+        */
         printf("point window: (%f, %f, %f)\n", pos.x, pos.y, pos.z);
         printf("normalized: (%f, %f, %f)\n", npos.x, npos.y, npos.z);
         printf("reversed back: (%f, %f, %f)\n\n", rpos.x, rpos.y, rpos.z);
 
-        mesh->addVertex(pos);
+        // arrange for display by swapping y <-> z
+        if (mesh->getDrawStage() == Spline::DrawStage::ONE)
+            pos = glm::vec3(pos.x, pos.z, pos.y);
+
+        mesh->addDataVertex(npos);
+        mesh->addDrawVertex(pos);
+
+        mesh->uploadVertices();
     }
 }

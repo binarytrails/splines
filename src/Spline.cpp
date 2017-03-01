@@ -138,6 +138,43 @@ void Spline::render(const Window* window, const Camera* camera,
     this->draw();
 }
 
+std::vector<glm::vec3>* Spline::getDataVertices()
+{
+    std::vector<glm::vec3> *vertices;
+    switch (this->drawStage)
+    {
+        case (Spline::DrawStage::ONE):
+            vertices = &this->dataModel->profileVertices;
+
+        case (Spline::DrawStage::TWO):
+            vertices = &this->dataModel->trajectoryVertices;
+
+        case (Spline::DrawStage::THREE):
+            vertices = &this->dataModel->vertices;
+    }
+    return vertices;
+}
+
+std::vector<glm::vec3>* Spline::getDrawVertices()
+{
+    std::vector<glm::vec3> *vertices;
+    switch (this->drawStage)
+    {
+        case (Spline::DrawStage::ONE):
+            vertices = &this->splineOne;
+            break;
+
+        case (Spline::DrawStage::TWO):
+            vertices = &this->splineTwo;
+            break;
+
+        case (Spline::DrawStage::THREE):
+            vertices = &this->splinesSweep;
+            break;
+    }
+    return vertices;
+}
+
 void Spline::draw()
 {
     // connect to vao & draw vertices
@@ -146,17 +183,17 @@ void Spline::draw()
         {
             case (Spline::DrawStage::ONE):
                 glDrawArrays(this->renderMode, 0,
-                             this->formattedVertices.size());
+                             this->getDrawVertices()->size());
                 break;
 
             case (Spline::DrawStage::TWO):
                 glDrawArrays(this->renderMode, 0,
-                             this->dataModel->trajectoryVertices.size());
+                             this->getDrawVertices()->size());
                 break;
 
             case (Spline::DrawStage::THREE):
                 glDrawElements(renderMode,
-                               this->verticesIndices.size(),
+                               this->getDrawVertices()->size(),
                                GL_UNSIGNED_SHORT, 0);
                 break;
         }
@@ -164,37 +201,36 @@ void Spline::draw()
     glBindVertexArray(0);
 }
 
-void Spline::addVertex(const glm::vec3 vertex)
+void Spline::addDataVertex(const glm::vec3 normalizedVertex)
 {
-    glm::vec3 draw_vertex = vertex;
-    std::vector<glm::vec3> *vertices;
+    std::vector<glm::vec3> *dataVertices = this->getDataVertices();
+    /*
+    printf("Adding data vertex : (%f, %f, %f)\n",
+            normalizedVertex.x, normalizedVertex.y, normalizedVertex.z
+    );
+    */
+    dataVertices->push_back(normalizedVertex);
+}
 
-    switch (this->drawStage)
-    {
-        case (Spline::DrawStage::ONE):
-            // push real data
-            this->dataModel->profileVertices.push_back(vertex);
-            // arrange for display by swapping y <-> z
-            draw_vertex = glm::vec3(vertex.x, vertex.z, vertex.y);
-            vertices = &this->formattedVertices;
-            break;
+void Spline::addDrawVertex(const glm::vec3 vertex)
+{
+    glm::vec3 drawVertex = vertex;
+    this->getDrawVertices()->push_back(drawVertex);
+}
 
-        case (Spline::DrawStage::TWO):
-            vertices = &this->dataModel->trajectoryVertices;
-            break;
-
-        case (Spline::DrawStage::THREE):
-            vertices = &this->dataModel->vertices;
-            break;
-    }
-    vertices->push_back(draw_vertex);
-
-    // connect & upload to vbo
+void Spline::uploadVertices()
+{
+    // connect
     glBindBuffer(GL_ARRAY_BUFFER, this->vboId);
-        glBufferData(GL_ARRAY_BUFFER,
-                     sizeof(glm::vec3) * vertices->size(),
-                     &vertices->at(0), GL_STATIC_DRAW);
-    // disconnect vbo by binding to default
+
+        if (this->getDrawVertices()->size() == 0)
+            glBufferData(GL_ARRAY_BUFFER, 0, NULL, GL_STATIC_DRAW);
+        else
+            glBufferData(GL_ARRAY_BUFFER,
+                     sizeof(glm::vec3) * this->getDrawVertices()->size(),
+                     &this->getDrawVertices()->at(0), GL_STATIC_DRAW);
+
+    // disconnect by binding to default
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
@@ -389,9 +425,7 @@ void Spline::printVerticesIndices() const
 bool Spline::saveData()
 {
     if (this->drawStage != Spline::DrawStage::THREE)
-    {
         return false;
-    }
 
     DataModel::SweepType sweepType = this->dataModel->getSweepType();
 
@@ -406,37 +440,29 @@ bool Spline::saveData()
     {
         this->dataModel->saveNumber(this->dataModel->spans);
     }
+    // TODO change for filepath once implemented
+    printf("Data saved to %s\n", this->dataModel->getFilename().c_str());
+
     return true;
 }
 
+// only written to drawn vertices
 bool Spline::genSplineCatmullRom()
 {
     printf("Generating Catmull-Rom Spline..\n");
 
-    std::vector<glm::vec3> *vertices;
+    if (this->drawStage == Spline::DrawStage::THREE)
+        return false;
 
-    switch (this->drawStage)
-    {
-        case (Spline::DrawStage::ONE):
-            vertices = &this->dataModel->profileVertices;
-            break;
+    // assuming user data points were inserted before
+    std::vector<glm::vec3> *drawVertices = this->getDrawVertices();
 
-        case (Spline::DrawStage::TWO):
-            vertices = &this->dataModel->trajectoryVertices;
-            break;
-
-        default:
-            return false;
-    }
-
-    if (vertices->size() < 4)
+    if (drawVertices->size() < 4)
     {
         printf("A minimum of 4 points is requiered "
                "to generate a Catmull-Rom Spline.\n");
         return false;
     }
-
-    std::vector<glm::vec3> vbuffer;
 
     GLfloat s = 0.5f;
 
@@ -451,20 +477,22 @@ bool Spline::genSplineCatmullRom()
     float step = 1.0f / tmax;
 
     // add artificial before first
-    vertices->insert(vertices->begin(), vertices->at(0) - step);
+    drawVertices->insert(drawVertices->begin(), drawVertices->at(0) - step);
     // add artificial after last
-    vertices->push_back(vertices->at(vertices->size()-1) + step);
+    drawVertices->push_back(drawVertices->at(drawVertices->size()-1) + step);
+
+    std::vector<glm::vec3> vbuffer;
 
     // for n segments with n+3 control points
-    for (uint16_t i = 1; i < vertices->size() - 2; i++)
+    for (uint16_t i = 1; i < drawVertices->size() - 2; i++)
     {
         // brute force (for n segments)
         for (float t = 0.0f; t < 1.0f - step; t += step)
         {
-            glm::vec3 p0 = vertices->at(i - 1);
-            glm::vec3 p1 = vertices->at(i);
-            glm::vec3 p2 = vertices->at(i + 1);
-            glm::vec3 p3 = vertices->at(i + 2);
+            glm::vec3 p0 = drawVertices->at(i - 1);
+            glm::vec3 p1 = drawVertices->at(i);
+            glm::vec3 p2 = drawVertices->at(i + 1);
+            glm::vec3 p3 = drawVertices->at(i + 2);
 
             glm::vec4 params = glm::vec4(t*t*t, t*t, t, 1.0f);
 
@@ -484,11 +512,10 @@ bool Spline::genSplineCatmullRom()
         }
     }
 
-    // push back into the proper vertices
+    drawVertices->clear();
+
     for (uint16_t i = 0; i < vbuffer.size(); i++)
-    {
-        glm::vec3 vertex = vbuffer.at(i);
-        this->addVertex(vertex);
-    }
+        this->addDrawVertex(vbuffer.at(i));
+
     return true;
 }
