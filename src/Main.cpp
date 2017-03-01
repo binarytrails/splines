@@ -322,6 +322,8 @@ void key_callback(GLFWwindow* w, int key, int scancode,
     }
 }
 
+//glm::vec3 
+
 void mouse_key_callback(GLFWwindow* w, int key,
                         int action, int mode)
 {
@@ -339,26 +341,39 @@ void mouse_key_callback(GLFWwindow* w, int key,
         cursorX = cursorX;
 
         glm::vec3 pos;
+        glm::vec4 npos; // normalized for [-1, 1] range
+        glm::vec4 rpos; // reverse normalized test
 
         if (mesh->getDrawStage() == Spline::DrawStage::ONE)
         {
             pos.x = (GLfloat) cursorX;
             pos.y = 0.0f;
-            pos.z = (GLfloat) cursorY;
+            pos.z = (GLfloat) cursorY; // FIXME doesn't work
+
+            npos = (projection * view) * glm::vec4(pos, 1.0f);
+            npos.y = 0.0f;
+            // manual way since z-value fails with matrix arithmetics
+            npos.z = -1 * (1.0 - 2.0 * pos.z / window->height());
         }
         else if (mesh->getDrawStage() == Spline::DrawStage::TWO)
         {
             pos.x = (GLfloat) cursorX;
             pos.y = (GLfloat) cursorY;
             pos.z = 0.0f;
+
+            npos = (projection * view) * glm::vec4(pos, 1.0f);
+            npos.z = 0.0f;
         }
+        // FIXME z-value, and keep z or y blank
+        rpos = glm::inverse(projection * view) * npos;
 
         /* transform window coordinates -> model space coordinates
          * ahem.. no need for orthographic?
          */
         //glm::vec3 pos = glm::project(pos, view, projection, window->viewPort());
         printf("point window: (%f, %f, %f)\n", pos.x, pos.y, pos.z);
-
+        printf("point normal: (%f, %f, %f)\n", npos.x, npos.y, npos.z);
+        printf("point revers: (%f, %f, %f)\n", rpos.x, rpos.y, rpos.z);
         mesh->addVertex(pos);
     }
 }
