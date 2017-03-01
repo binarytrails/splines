@@ -322,7 +322,65 @@ void key_callback(GLFWwindow* w, int key, int scancode,
     }
 }
 
-//glm::vec3 
+glm::vec3 getScreenCoordinates(const bool normalize)
+{
+    double cursorX, cursorY;
+    glfwGetCursorPos(window->get(), &cursorX, &cursorY);
+
+    cursorY = (double) window->height() - (GLfloat) cursorY; // mirror
+    cursorX = cursorX;
+
+    glm::vec3 pos((GLfloat) cursorX, (GLfloat) cursorY, 1.0f);
+    glm::vec4 npos;
+
+    if (mesh->getDrawStage() == Spline::DrawStage::ONE)
+    {
+        pos.z = pos.y;
+        if (normalize)
+        {
+            npos = (projection * view) * glm::vec4(pos, 1.0f);
+            pos = glm::vec3(
+                pos.x = npos.x,
+                0.0f,
+                // manually forcing it
+                -1 * (1.0 - (2.0 * pos.z) / window->height())
+            );
+        }
+        pos.y = 0.0f;
+    }
+    else if (mesh->getDrawStage() == Spline::DrawStage::TWO)
+    {
+        if (normalize)
+        {
+            npos = (projection * view) * glm::vec4(pos, 1.0f);
+            pos = glm::vec3(
+                npos.x,
+                npos.y,
+                0.0f
+            );
+        }
+        pos.z = 0.0f;
+    }
+
+    return pos;
+}
+
+glm::vec3 normalizedToScreenCoordinates(const glm::vec3 npos)
+{
+    glm::vec3 pos = glm::inverse(projection * view) * glm::vec4(npos, 1.0f);
+
+    if (mesh->getDrawStage() == Spline::DrawStage::ONE)
+    {
+        pos.y = 0.0f;
+        //pos.z = -1 * (1.0 - (2.0 * pos.z) / window->height())
+        pos.z = ((npos.z + 1) / 2.0f) * window->height();
+    }
+    else if (mesh->getDrawStage() == Spline::DrawStage::TWO)
+    {
+        pos.z = 0.0f;
+    }
+    return pos;
+}
 
 void mouse_key_callback(GLFWwindow* w, int key,
                         int action, int mode)
@@ -332,48 +390,18 @@ void mouse_key_callback(GLFWwindow* w, int key,
         keyEnterCounter == 0 &&
         mesh->getDrawStage() < Spline::DrawStage::THREE)
     {
-        double cursorX, cursorY;
-        glfwGetCursorPos(window->get(),
-                         &cursorX, &cursorY);
+        glm::vec3 pos = getScreenCoordinates(false);
 
-        // mirror top right as 0 -> bottom left as 0
-        cursorY = (double) window->height() - (GLfloat) cursorY;
-        cursorX = cursorX;
+        // normalized for [-1, 1] range
+        glm::vec3 npos = getScreenCoordinates(true);
 
-        glm::vec3 pos;
-        glm::vec4 npos; // normalized for [-1, 1] range
-        glm::vec4 rpos; // reverse normalized test
+        // reverse normalized test
+        glm::vec3 rpos = normalizedToScreenCoordinates(npos);
 
-        if (mesh->getDrawStage() == Spline::DrawStage::ONE)
-        {
-            pos.x = (GLfloat) cursorX;
-            pos.y = 0.0f;
-            pos.z = (GLfloat) cursorY; // FIXME doesn't work
-
-            npos = (projection * view) * glm::vec4(pos, 1.0f);
-            npos.y = 0.0f;
-            // manual way since z-value fails with matrix arithmetics
-            npos.z = -1 * (1.0 - 2.0 * pos.z / window->height());
-        }
-        else if (mesh->getDrawStage() == Spline::DrawStage::TWO)
-        {
-            pos.x = (GLfloat) cursorX;
-            pos.y = (GLfloat) cursorY;
-            pos.z = 0.0f;
-
-            npos = (projection * view) * glm::vec4(pos, 1.0f);
-            npos.z = 0.0f;
-        }
-        // FIXME z-value, and keep z or y blank
-        rpos = glm::inverse(projection * view) * npos;
-
-        /* transform window coordinates -> model space coordinates
-         * ahem.. no need for orthographic?
-         */
-        //glm::vec3 pos = glm::project(pos, view, projection, window->viewPort());
         printf("point window: (%f, %f, %f)\n", pos.x, pos.y, pos.z);
-        printf("point normal: (%f, %f, %f)\n", npos.x, npos.y, npos.z);
-        printf("point revers: (%f, %f, %f)\n", rpos.x, rpos.y, rpos.z);
+        printf("normalized: (%f, %f, %f)\n", npos.x, npos.y, npos.z);
+        printf("reversed back: (%f, %f, %f)\n\n", rpos.x, rpos.y, rpos.z);
+
         mesh->addVertex(pos);
     }
 }
