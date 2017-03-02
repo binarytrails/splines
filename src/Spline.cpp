@@ -283,10 +283,19 @@ void Spline::sweep()
 {
     if (this->getSweepType() == DataModel::SweepType::Translational)
     {
-        // FIXME find a way to generate splines based on normalized data points
-        std::vector<glm::vec3> polygon1 = this->dataModel->profileVertices;
+        // regenerate normalized splines draw data {
+        this->spline1 = this->dataModel->profileVertices;
+        this->spline2 = this->dataModel->trajectoryVertices;
+        this->setDrawStage(Spline::DrawStage::ONE);
+        this->genCatmullRomSpline();
+        this->setDrawStage(Spline::DrawStage::TWO);
+        this->genCatmullRomSpline();
+        this->setDrawStage(Spline::DrawStage::THREE);
+        // } regenerate
+
+        std::vector<glm::vec3> polygon1 = this->spline1;
         std::vector<glm::vec3> polygon2;
-        std::vector<glm::vec3> tpolygon = this->dataModel->trajectoryVertices;
+        std::vector<glm::vec3> tpolygon = this->spline2;
 
         this->splines.clear();
 
