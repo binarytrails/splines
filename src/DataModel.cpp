@@ -43,7 +43,7 @@ void DataModel::setFileSuffix(const std::string suffix)
 
 std::string DataModel::getFilename() const
 {
-    return this->getSweepTypeString() + "_" + this->fileSuffix;
+    return "data/" + this->getSweepTypeString() + "_" + this->fileSuffix;
 }
 
 bool DataModel::fileExists()

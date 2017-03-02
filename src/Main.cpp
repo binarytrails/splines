@@ -309,6 +309,7 @@ void key_callback(GLFWwindow* w, int key, int scancode,
     if (key == GLFW_KEY_BACKSPACE && action == GLFW_PRESS)
     {
         resetDraw = true;
+        glfwSetWindowShouldClose(w, GL_TRUE);
     }
 
 	if (mesh->getDrawStage() < Spline::DrawStage::THREE)
@@ -381,11 +382,11 @@ void key_callback(GLFWwindow* w, int key, int scancode,
     {
         if (key == GLFW_KEY_LEFT)
         {
-            mesh->rotate(glm::vec3(0, -1, 0));
+            mesh->rotate(glm::vec3(0, 1, 0));
         }
         if (key == GLFW_KEY_RIGHT)
         {
-            mesh->rotate(glm::vec3(0, 1, 0));
+            mesh->rotate(glm::vec3(0, -1, 0));
         }
         if (key == GLFW_KEY_UP)
         {
