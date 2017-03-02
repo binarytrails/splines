@@ -145,12 +145,15 @@ std::vector<glm::vec3>* Spline::getDataVertices()
     {
         case (Spline::DrawStage::ONE):
             vertices = &this->dataModel->profileVertices;
+            break;
 
         case (Spline::DrawStage::TWO):
             vertices = &this->dataModel->trajectoryVertices;
+            break;
 
         case (Spline::DrawStage::THREE):
             vertices = &this->dataModel->vertices;
+            break;
     }
     return vertices;
 }
@@ -427,21 +430,20 @@ bool Spline::saveData()
     if (this->drawStage != Spline::DrawStage::THREE)
         return false;
 
-    DataModel::SweepType sweepType = this->dataModel->getSweepType();
+    this->dataModel->deleteFile();
 
-    this->dataModel->saveNumber(sweepType);
+    this->dataModel->saveNumber(this->getSweepType());
+
+    if (this->getSweepType() == DataModel::SweepType::Rotational)
+        this->dataModel->saveNumber(this->dataModel->spans);
+
     this->dataModel->saveVertices(this->dataModel->profileVertices);
 
-    if (sweepType == DataModel::SweepType::Translational)
-    {
+    if (this->getSweepType() == DataModel::SweepType::Translational)
         this->dataModel->saveVertices(this->dataModel->trajectoryVertices);
-    }
-    else if (sweepType == DataModel::SweepType::Rotational)
-    {
-        this->dataModel->saveNumber(this->dataModel->spans);
-    }
+
     // TODO change for filepath once implemented
-    printf("Data saved to %s\n", this->dataModel->getFilename().c_str());
+    printf("Data saved to %s.\n", this->dataModel->getFilename().c_str());
 
     return true;
 }

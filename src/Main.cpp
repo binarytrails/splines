@@ -142,11 +142,7 @@ bool shellMenu(const std::string fileSuffix)
                 if (mesh->initData(fileSuffix, false, true))
                 {
                     mesh->setDrawStage(Spline::DrawStage::ONE);
-                    //mesh->genSplineCatmullRom();
-                    //mesh->setDrawStage(Spline::DrawStage::TWO);
-                    //mesh->genSplineCatmullRom();
-                    //mesh->sweep();
-                    //mesh->setDrawStage(Spline::DrawStage::THREE);
+                    mesh->uploadVertices();
                     chosen = true;
                 }
                 break;
