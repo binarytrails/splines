@@ -121,10 +121,6 @@ void Spline::render(const Window* window, const Camera* camera,
 {
     this->shader->use();
 
-    // update coordinate system model view
-    this->model = glm::rotate(this->model, this->xAngle,
-                              glm::vec3(1.0f, 0.0f, 0.0f));
-
     // locate in shaders gpu
     GLint modelLoc = glGetUniformLocation(this->shader->ProgramId, "model");
     GLint viewLoc = glGetUniformLocation(this->shader->ProgramId, "view");
@@ -170,9 +166,8 @@ std::vector<glm::vec3>* Spline::getDrawVertices()
         case (Spline::DrawStage::TWO):
             vertices = &this->splineTwo;
             break;
-
         case (Spline::DrawStage::THREE):
-            vertices = &this->splinesSweep;
+            vertices = &this->dataModel->vertices; // TODO
             break;
     }
     return vertices;
@@ -196,7 +191,7 @@ void Spline::draw()
 
             case (Spline::DrawStage::THREE):
                 glDrawElements(renderMode,
-                               this->getDrawVertices()->size(),
+                               this->verticesIndices.size(),
                                GL_UNSIGNED_SHORT, 0);
                 break;
         }
@@ -250,7 +245,6 @@ void Spline::rotate(const int x, const int y, const int z)
     if (x == 1)
     {
         this->xAngle = fmod((this->xAngle + this->angleStep), 360.0f);
-        //printf("new x angle: %f\n", this->xAngle);
     }
     else if (x == -1)
     {
@@ -265,36 +259,40 @@ void Spline::rotate(const int x, const int y, const int z)
     {
         this->yAngle = fmod((this->yAngle - this->angleStep), 360.0f);
     }
+
+
+    this->model = glm::rotate(this->model, this->xAngle,
+                              glm::vec3(1.0f, 0.0f, 0.0f));
+
+    this->model = glm::rotate(this->model, this->yAngle,
+                              glm::vec3(0.0f, 1.0f, 0.0f));
 }
 
 void Spline::sweep()
 {
     if (this->dataModel->getSweepType() == DataModel::SweepType::Translational)
     {
-        std::vector<glm::vec3> p1 = this->dataModel->profileVertices;
-        std::vector<glm::vec3> p2;
-        std::vector<glm::vec3> t = this->dataModel->trajectoryVertices;
+        std::vector<glm::vec3> polygon1 = this->dataModel->profileVertices;
+        std::vector<glm::vec3> polygon2;
+        std::vector<glm::vec3> tpolygon = this->dataModel->trajectoryVertices;
 
         this->dataModel->vertices.clear();
-        this->pushVertices(p1);
+        this->pushVertices(polygon1);
 
         // for n translation <=> n new profile curves
-        for (uint16_t i = 0;
-             i < this->dataModel->trajectoryVertices.size(); i++)
+        for (uint16_t i = 0; i < tpolygon.size(); i++)
         {
-
             // get translation vector from t_i+1 - t_i
-            glm::vec3 v(t[i+1] - t[i]);
+            glm::vec3 v(tpolygon[i+1] - tpolygon[i]);
 
             // create new profile curve
-            p2 = this->translateProfileCurve(p1, v);
+            polygon2 = this->translateProfileCurve(polygon1, v);
 
-            this->pushVertices(p2);                 // with EBO
-            //this->formatVerticesForVBO(p1, p2);     // without EBO
+            this->pushVertices(polygon2);
 
             // start at next profile curve
-            p1 = p2;
-            p2.clear();
+            polygon1 = polygon2;
+            polygon2.clear();
         }
     }
     else
@@ -326,14 +324,10 @@ void Spline::genVerticesIndices()
 
     uint16_t sweeps;
 
-    if (this->dataModel->getSweepType() == DataModel::SweepType::Translational)
-    {
+    if (this->getSweepType() == DataModel::SweepType::Translational)
         sweeps = this->dataModel->trajectoryPoints;
-    }
     else
-    {
         sweeps = this->dataModel->spans;
-    }
 
     this->verticesIndices.clear();
 
@@ -357,23 +351,6 @@ void Spline::genVerticesIndices()
             this->verticesIndices.push_back(p2);
             this->verticesIndices.push_back(p2 + 1);
         }
-    }
-}
-
-// FIXME dead code with ebo
-void Spline::formatVerticesForVBO(std::vector<glm::vec3> p1,
-                                std::vector<glm::vec3> p2)
-{
-    for (uint16_t i = 0; i < this->dataModel->profileVertices.size() - 1; i++)
-    {
-        // Triangle 1
-        this->dataModel->vertices.push_back(p1[i]);
-        this->dataModel->vertices.push_back(p1[i+1]);
-        this->dataModel->vertices.push_back(p2[i]);
-        // Triangle 2
-        this->dataModel->vertices.push_back(p1[i+1]);
-        this->dataModel->vertices.push_back(p2[i]);
-        this->dataModel->vertices.push_back(p2[i+1]);
     }
 }
 

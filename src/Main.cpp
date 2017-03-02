@@ -140,7 +140,8 @@ bool shellMenu(const std::string fileSuffix)
     while (!chosen)
     {
         std::cout << "[R]otational || [T]ransation? ";
-        std::cin >> choice;
+        //std::cin >> choice;
+        choice = 't';
 
         switch (choice)
         {
@@ -187,7 +188,8 @@ bool shellMenu(const std::string fileSuffix)
         std::cout << "File " << mesh->getDataFilePath() << " exists." <<
                   std::endl << "Do you want to [o]verwrite it " <<
                   "or [u]se it as input? ";
-        std::cin >> choice;
+        //std::cin >> choice;
+        choice = 'u';
 
         mesh->setDrawStage(Spline::DrawStage::ONE);
 
@@ -329,15 +331,29 @@ void key_callback(GLFWwindow* w, int key, int scancode,
 
                     case Spline::DrawStage::TWO:
                         mesh->setDrawStage(Spline::DrawStage::THREE);
-                        mesh->saveData();
                         mesh->uploadVertices();
+                        mesh->saveData();
+
+                        printf("\n\nbefore sweep:\n");
+                        mesh->printVertices();
+                        printf("\nindices:\n");
+                        mesh->printVerticesIndices();
+
+                        mesh->sweep();
+                        mesh->uploadVertices();
+                        mesh->genVerticesIndices();
+
+                        printf("\n\nafter sweep:\n");
+                        mesh->printVertices();
+                        printf("\nindices:\n");
+                        mesh->printVerticesIndices();
+
                         break;
                 }
                 keyEnterCounter = 0;
             }
         }
         if (key == GLFW_KEY_S && action == GLFW_PRESS)
-
         {
             mesh->genSplineCatmullRom();
         }

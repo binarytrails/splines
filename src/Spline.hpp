@@ -78,10 +78,6 @@ class Spline : public Mesh
     private:
         void initBuffers();
 
-        void formatVerticesForVBO(
-            std::vector<glm::vec3> p1,
-            std::vector<glm::vec3> p2);
-
         std::vector<glm::vec3> translateProfileCurve(
             std::vector<glm::vec3> p, glm::vec3 t);
 
