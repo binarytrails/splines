@@ -304,6 +304,7 @@ void key_callback(GLFWwindow* w, int key, int scancode,
 
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
     {
+        resetDraw = true;
         glfwSetWindowShouldClose(w, GL_TRUE);
     }
     if (key == GLFW_KEY_BACKSPACE && action == GLFW_PRESS)
