@@ -35,6 +35,65 @@ void mouse_key_callback(GLFWwindow* w, int key, int action, int mode);
 
 void framebuffer_size_callback(GLFWwindow* w, int width, int height);
 
+glm::vec3 getScreenCoordinates(const bool normalize)
+{
+    double cursorX, cursorY;
+    glfwGetCursorPos(window->get(), &cursorX, &cursorY);
+
+    cursorY = (double) window->height() - (GLfloat) cursorY; // mirror
+    cursorX = cursorX;
+
+    glm::vec3 pos((GLfloat) cursorX, (GLfloat) cursorY, 1.0f);
+    glm::vec4 npos;
+
+    if (mesh->getDrawStage() == Spline::DrawStage::ONE)
+    {
+        pos.z = pos.y;
+        if (normalize)
+        {
+            npos = (projection * view) * glm::vec4(pos, 1.0f);
+            pos = glm::vec3(
+                pos.x = npos.x,
+                0.0f,
+                // FIXME manually forcing it
+                -1 * (1.0 - (2.0 * pos.z) / window->height())
+            );
+        }
+        pos.y = 0.0f;
+    }
+    else if (mesh->getDrawStage() == Spline::DrawStage::TWO)
+    {
+        if (normalize)
+        {
+            npos = (projection * view) * glm::vec4(pos, 1.0f);
+            pos = glm::vec3(
+                npos.x,
+                npos.y,
+                0.0f
+            );
+        }
+        pos.z = 0.0f;
+    }
+
+    return pos;
+}
+
+glm::vec3 normalizedToScreenCoordinates(const glm::vec3 npos)
+{
+    glm::vec3 pos = glm::inverse(projection * view) * glm::vec4(npos, 1.0f);
+
+    if (mesh->getDrawStage() == Spline::DrawStage::ONE)
+    {
+        pos.y = 0.0f;
+        pos.z = ((npos.z + 1) / 2.0f) * window->height();
+    }
+    else if (mesh->getDrawStage() == Spline::DrawStage::TWO)
+    {
+        pos.z = 0.0f;
+    }
+    return pos;
+}
+
 void initApplication(const DataModel::SweepType sweepType)
 {
     camera = new Camera();
@@ -130,17 +189,31 @@ bool shellMenu(const std::string fileSuffix)
                   "or [u]se it as input? ";
         std::cin >> choice;
 
+        mesh->setDrawStage(Spline::DrawStage::ONE);
+
         switch (choice)
         {
             case 'o':
                 if (mesh->initData(fileSuffix, true, false))
-                    mesh->setDrawStage(Spline::DrawStage::ONE);
                     chosen = true;
                 break;
 
             case 'u':
                 if (mesh->initData(fileSuffix, false, true))
                 {
+                    for (auto const &vertex: *mesh->getDataVertices())
+                    {
+                        glm::vec3 nvec = normalizedToScreenCoordinates(vertex);
+                        mesh->addDrawVertex(glm::vec3(nvec.x, nvec.z, nvec.y));
+                    }
+                    mesh->setDrawStage(Spline::DrawStage::TWO);
+
+                    for (auto const &vertex: *mesh->getDataVertices())
+                    {
+                        mesh->addDrawVertex(
+                            normalizedToScreenCoordinates(vertex)
+                        );
+                    }
                     mesh->setDrawStage(Spline::DrawStage::ONE);
                     mesh->uploadVertices();
                     chosen = true;
@@ -335,66 +408,6 @@ void key_callback(GLFWwindow* w, int key, int scancode,
             mesh->setRenderMode(GL_TRIANGLES);
         }
     }
-}
-
-glm::vec3 getScreenCoordinates(const bool normalize)
-{
-    double cursorX, cursorY;
-    glfwGetCursorPos(window->get(), &cursorX, &cursorY);
-
-    cursorY = (double) window->height() - (GLfloat) cursorY; // mirror
-    cursorX = cursorX;
-
-    glm::vec3 pos((GLfloat) cursorX, (GLfloat) cursorY, 1.0f);
-    glm::vec4 npos;
-
-    if (mesh->getDrawStage() == Spline::DrawStage::ONE)
-    {
-        pos.z = pos.y;
-        if (normalize)
-        {
-            npos = (projection * view) * glm::vec4(pos, 1.0f);
-            pos = glm::vec3(
-                pos.x = npos.x,
-                0.0f,
-                // FIXME manually forcing it
-                -1 * (1.0 - (2.0 * pos.z) / window->height())
-            );
-        }
-        pos.y = 0.0f;
-    }
-    else if (mesh->getDrawStage() == Spline::DrawStage::TWO)
-    {
-        if (normalize)
-        {
-            npos = (projection * view) * glm::vec4(pos, 1.0f);
-            pos = glm::vec3(
-                npos.x,
-                npos.y,
-                0.0f
-            );
-        }
-        pos.z = 0.0f;
-    }
-
-    return pos;
-}
-
-glm::vec3 normalizedToScreenCoordinates(const glm::vec3 npos)
-{
-    glm::vec3 pos = glm::inverse(projection * view) * glm::vec4(npos, 1.0f);
-
-    if (mesh->getDrawStage() == Spline::DrawStage::ONE)
-    {
-        pos.y = 0.0f;
-        //pos.z = -1 * (1.0 - (2.0 * pos.z) / window->height())
-        pos.z = ((npos.z + 1) / 2.0f) * window->height();
-    }
-    else if (mesh->getDrawStage() == Spline::DrawStage::TWO)
-    {
-        pos.z = 0.0f;
-    }
-    return pos;
 }
 
 void mouse_key_callback(GLFWwindow* w, int key,
