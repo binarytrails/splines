@@ -65,8 +65,8 @@ class Spline : public Mesh
 
         void setSpans(const uint16_t spans);
 
-        void genVerticesIndices();
-        bool genSplineCatmullRom();
+        void genSplinesIndices();
+        bool genCatmullRomSpline();
 
         void sweep();
 
@@ -81,10 +81,6 @@ class Spline : public Mesh
         std::vector<glm::vec3> translateProfileCurve(
             std::vector<glm::vec3> p, glm::vec3 t);
 
-        glm::vec3 lineVertex(std::string line);
-
-        void pushVertices(std::vector<glm::vec3> v);
-
         void draw();
 
         Shader *shader;
@@ -93,15 +89,15 @@ class Spline : public Mesh
         DrawStage drawStage;
         // in/output file data
         DataModel *dataModel;
-        std::vector<GLushort> verticesIndices;
         // splines over data
-        std::vector<glm::vec3> splineOne;
-        std::vector<glm::vec3> splineTwo;
-        std::vector<glm::vec3> splinesSweep;
+        std::vector<glm::vec3> spline1;
+        std::vector<glm::vec3> spline2;
+        std::vector<glm::vec3> splines;
+        std::vector<GLushort> splinesIndices;
         // coordinate system
         glm::mat4 model;
         // used for rotation
-        float angleStep = 0.1f;
+        float angleStep = 0.05f;
         float xAngle = 0.0f;
         float yAngle = 0.0f;
 };

@@ -262,7 +262,7 @@ int main(int argc, char *argv[])
 
         /*
         if (mesh->getRenderMode() != renderMode)
-            mesh->genVerticesIndices(renderMode);
+            mesh->genSplinesIndices(renderMode);
         */
 
         // contrainer matrices {
@@ -310,7 +310,7 @@ void key_callback(GLFWwindow* w, int key, int scancode,
             if (keyEnterCounter == 1 &&
                 mesh->getDrawStage() < Spline::DrawStage::THREE)
             {
-                if (mesh->genSplineCatmullRom())
+                if (mesh->genCatmullRomSpline())
                     mesh->uploadVertices();
                 else
                     keyEnterCounter--;
@@ -340,8 +340,9 @@ void key_callback(GLFWwindow* w, int key, int scancode,
                         mesh->printVerticesIndices();
 
                         mesh->sweep();
+                        mesh->genSplinesIndices();
+
                         mesh->uploadVertices();
-                        mesh->genVerticesIndices();
 
                         printf("\n\nafter sweep:\n");
                         mesh->printVertices();
@@ -355,7 +356,7 @@ void key_callback(GLFWwindow* w, int key, int scancode,
         }
         if (key == GLFW_KEY_S && action == GLFW_PRESS)
         {
-            mesh->genSplineCatmullRom();
+            mesh->genCatmullRomSpline();
         }
         if (key == GLFW_KEY_LEFT && action == GLFW_PRESS)
         {

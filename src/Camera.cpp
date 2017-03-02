@@ -11,7 +11,7 @@ Camera::Camera() :
     eye(0.0f, 0.0f, 0.0f),
     at(0.0f, 0.0f, -1.0f),
     up(0.0f, 1.0f, 0.0f),
-    speed(0.025f)
+    speed(0.25f)
 {
 }
 
