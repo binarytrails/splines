@@ -227,7 +227,7 @@ void Spline::uploadVertices()
             glBufferData(GL_ARRAY_BUFFER,
                      sizeof(glm::vec3) * this->getDrawVertices()->size(),
                      &this->getDrawVertices()->at(0), GL_STATIC_DRAW);
-    
+
     // disconnect by binding to default
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -295,8 +295,19 @@ void Spline::sweep()
             polygon2.clear();
         }
     }
-    else // TODO merge
+    else
     {
+        // regenerate normalized splines draw data {
+        this->spline1 = this->dataModel->profileVertices;
+        this->setDrawStage(Spline::DrawStage::ONE);
+        this->genCatmullRomSpline();
+        this->setDrawStage(Spline::DrawStage::THREE);
+        // } regenerate
+
+        this->splines.clear();
+        for (const auto& vertex: this->spline1)
+            this->addDrawVertex(vertex); // adds to splines
+
         // remove radians for artsy shapes
         GLfloat angle = 360.0f / this->dataModel->spans;
 
@@ -306,9 +317,7 @@ void Spline::sweep()
             for(uint16_t p = 0; p < this->spline1.size(); p++)
             {
                 glm::vec3 p1 = this->splines[p + (s * this->spline1.size())];
-
                 glm::vec3 p2 = glm::rotateZ(p1, angle);
-
                 this->splines.push_back(p2);
             }
         }
