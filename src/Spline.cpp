@@ -131,6 +131,12 @@ void Spline::render(const Window* window, const Camera* camera,
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
+    if (this->getDrawStage() == Spline::DrawStage::THREE)
+    {
+        GLint colorizeLoc = glGetUniformLocation(
+            this->shader->ProgramId, "colorize");
+        glUniform1i(colorizeLoc, 1);
+    }
     this->draw();
 }
 
@@ -201,16 +207,11 @@ void Spline::draw()
 
 void Spline::addDataVertex(const glm::vec3 normalizedVertex)
 {
-    printf("Adding data vertex : (%f, %f, %f)\n",
-           normalizedVertex.x, normalizedVertex.y, normalizedVertex.z);
-
     this->getDataVertices()->push_back(normalizedVertex);
 }
 
 void Spline::addDrawVertex(const glm::vec3 vertex)
 {
-    printf("Adding draw vertex : (%f, %f, %f)\n",
-           vertex.x, vertex.y, vertex.z);
     this->getDrawVertices()->push_back(vertex);
 }
 

@@ -97,5 +97,5 @@ class Spline : public Mesh
         // coordinate system
         glm::mat4 model;
         // used for rotation
-        float angleStep = 0.05f;
+        float angleStep = 0.20f;
 };
