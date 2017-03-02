@@ -120,12 +120,6 @@ void initApplication(const DataModel::SweepType sweepType)
     projection = glm::ortho(0.0f, (GLfloat) window->width(),
                             0.0f, (GLfloat) window->height(),
                             0.1f, 100.0f);
-    /*
-    projection = glm::perspective(
-        45.0f, (GLfloat) window->width() / (GLfloat) window->height(),
-        0.1f, 100.0f
-    );
-    */
     // } container matrix
 }
 
@@ -140,8 +134,7 @@ bool shellMenu(const std::string fileSuffix)
     while (!chosen)
     {
         std::cout << "[R]otational || [T]ransation? ";
-        //std::cin >> choice;
-        choice = 't';
+        std::cin >> choice;
 
         switch (choice)
         {
@@ -188,8 +181,7 @@ bool shellMenu(const std::string fileSuffix)
         std::cout << "File " << mesh->getDataFilePath() << " exists." <<
                   std::endl << "Do you want to [o]verwrite it " <<
                   "or [u]se it as input? ";
-        //std::cin >> choice;
-        choice = 'u';
+        std::cin >> choice;
 
         mesh->setDrawStage(Spline::DrawStage::ONE);
 
@@ -339,6 +331,9 @@ void key_callback(GLFWwindow* w, int key, int scancode,
                         mesh->genSplinesIndices();
 
                         mesh->uploadVertices();
+
+                        polygonMode = GL_FILL;
+                        mesh->setRenderMode(GL_TRIANGLES);
                         break;
                 }
                 keyEnterCounter = 0;
@@ -346,7 +341,8 @@ void key_callback(GLFWwindow* w, int key, int scancode,
         }
         if (key == GLFW_KEY_S && action == GLFW_PRESS)
         {
-            mesh->genCatmullRomSpline();
+            if (mesh->genCatmullRomSpline())
+                mesh->uploadVertices();
         }
         if (key == GLFW_KEY_LEFT && action == GLFW_PRESS)
         {
