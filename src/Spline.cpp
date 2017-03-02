@@ -462,7 +462,7 @@ bool Spline::genCatmullRomSpline()
     );
 
     float tmax = 10.0f;
-    float step = 5.0f / tmax;
+    float step = 1.0f / tmax;
 
     // add artificial before first
     drawVertices->insert(drawVertices->begin(), drawVertices->at(0) - step);
