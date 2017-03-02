@@ -2,6 +2,55 @@
 
 Generating 3d shapes by drawing splines and using them for translational or rotational sweeping
 
+![](images/rotational_umbrella-1.png)
+![](images/rotational_umbrella-2.png)
+![](images/rotational_umbrella-3.png)
+![](images/rotational_umbrella-4.png)
+![](images/rotational_umbrella-5.png)
+![](images/rotational_sharp_bowl-1.png)
+
+## Setup
+
+It was tested on Arch Linux.
+
+### Dependencies
+
+    # Arch Linux
+    sudo pacman -S glew glm glfw-x11 mesa-demos
+
+### Compiling:
+
+    make arch       # Arch Linux
+    make linux      # GNU / Linux (general)
+
+## Usage
+
+An example command:
+
+    ./run.sh <name>
+
+### Controls
+
+    [Slines drawing]
+        left mouse click    marks control points in the window
+        s                   generate spline
+        enter1              generates spline
+        enter2              goes to next spline
+        l                   switch to previous spline
+        r                   switch to next spline
+        backspace           resets the application
+
+    [Generated spline visualization]
+        rotate              arrows
+        w                   move forward
+        s                   move backward
+        a                   move left
+        d                   move right
+        l                   display lines
+        t                   display triangles
+        p                   display points
+
+
 ## Roadmap
 
 ### Requierements
@@ -34,52 +83,6 @@ Generating 3d shapes by drawing splines and using them for translational or rota
 
 * Use the subdivision algorithm taking into account the curvature (rather than distance) for drawing the curve
 
-## Usage
-
-An example command:
-
-    ./run.sh
-
-### Controls
-
-    [Slines drawing]
-        left mouse click    marks control points in the window
-        s                   generate spline
-        enter1              generates spline
-        enter2              goes to next spline
-        l                   switch to previous spline
-        r                   switch to next spline
-        backspace           resets the application
-
-    [Generated spline visualization]
-        rotate              arrows
-        w                   move forward
-        s                   move backward
-        a                   move left
-        d                   move right
-        l                   display lines
-        t                   display triangles
-        p                   display points
-
-## Setup
-
-It was tested on Arch Linux.
-
-### Arch Linux
-
-Install these :
-
-    sudo pacman -S glew glm glfw-x11 mesa-demos
-
-Compile:
-
-    make arch
-
-### Linux (general)
-
-Install the dependencies and compile:
-
-    make linux
 
 ## Authors
 
