@@ -103,7 +103,7 @@ bool DataModel::loadInputFile()
         for(unsigned int i = 0; i < this->profilePoints; i++)
         {
             ifs >> x >> y >> z;
-            this->vertices.push_back(glm::vec3(x, y, z));
+            this->profileVertices.push_back(glm::vec3(x, y, z));
         }
     }
     ifs.close();

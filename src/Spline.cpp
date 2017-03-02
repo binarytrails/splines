@@ -8,7 +8,6 @@
 Spline::Spline()
 {
     this->dataModel = new DataModel();
-    this->dataModel->vertices.clear();
     this->splinesIndices.clear();
 
     this->shader = new Shader(
@@ -71,8 +70,8 @@ void Spline::initBuffers()
     glBindBuffer(GL_ARRAY_BUFFER, this->vboId);
     glBufferData(GL_ARRAY_BUFFER,
                  sizeof(glm::vec3) *
-                    this->dataModel->vertices.size(),
-                 &this->dataModel->vertices[0], GL_STATIC_DRAW);
+                    this->splines.size(),
+                 &this->splines[0], GL_STATIC_DRAW);
 
     // has to be before ebo bind
     glBindVertexArray(this->vaoId);
@@ -161,14 +160,14 @@ std::vector<glm::vec3>* Spline::getDrawVertices()
     switch (this->drawStage)
     {
         case (Spline::DrawStage::ONE):
-            vertices = &this->spline1;
+            vertices = &this->spline1;  // non normalized
             break;
 
         case (Spline::DrawStage::TWO):
-            vertices = &this->spline2;
+            vertices = &this->spline2;  // non normalized
             break;
         case (Spline::DrawStage::THREE):
-            vertices = &this->splines;
+            vertices = &this->splines;  // normalized
             break;
     }
     return vertices;
@@ -202,19 +201,17 @@ void Spline::draw()
 
 void Spline::addDataVertex(const glm::vec3 normalizedVertex)
 {
-    std::vector<glm::vec3> *dataVertices = this->getDataVertices();
-    /*
     printf("Adding data vertex : (%f, %f, %f)\n",
-            normalizedVertex.x, normalizedVertex.y, normalizedVertex.z
-    );
-    */
-    dataVertices->push_back(normalizedVertex);
+           normalizedVertex.x, normalizedVertex.y, normalizedVertex.z);
+
+    this->getDataVertices()->push_back(normalizedVertex);
 }
 
 void Spline::addDrawVertex(const glm::vec3 vertex)
 {
-    glm::vec3 drawVertex = vertex;
-    this->getDrawVertices()->push_back(drawVertex);
+    printf("Adding draw vertex : (%f, %f, %f)\n",
+           vertex.x, vertex.y, vertex.z);
+    this->getDrawVertices()->push_back(vertex);
 }
 
 void Spline::uploadVertices()
@@ -233,9 +230,7 @@ void Spline::uploadVertices()
     // disconnect by binding to default
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    printf("%i\n", this->splinesIndices.size());
-
-    // vertices indices
+    // indices
     if (this->getDrawStage() == Spline::DrawStage::THREE)
     {
         // connect
@@ -288,14 +283,15 @@ void Spline::sweep()
 {
     if (this->getSweepType() == DataModel::SweepType::Translational)
     {
-        std::vector<glm::vec3> polygon1 = this->spline1;
+        // FIXME find a way to generate splines based on normalized data points
+        std::vector<glm::vec3> polygon1 = this->dataModel->profileVertices;
         std::vector<glm::vec3> polygon2;
-        std::vector<glm::vec3> tpolygon = this->spline2;
+        std::vector<glm::vec3> tpolygon = this->dataModel->trajectoryVertices;
 
         this->splines.clear();
 
         for (const auto& vertex: polygon1)
-            this->addDataVertex(vertex);
+            this->addDrawVertex(vertex);
 
         // for n translation <=> n new profile curves
         for (uint16_t i = 0; i < tpolygon.size(); i++)
@@ -307,7 +303,7 @@ void Spline::sweep()
             polygon2 = this->translateProfileCurve(polygon1, vertex);
 
             for (const auto& vertex: polygon1)
-                this->addDataVertex(vertex);
+                this->addDrawVertex(vertex);
 
             // start at next profile curve
             polygon1 = polygon2;
@@ -322,15 +318,13 @@ void Spline::sweep()
         for(uint16_t s = 0; s < this->dataModel->spans; s++)
         {
             // rotateCurve
-            for(uint16_t p = 0; p < this->dataModel->profilePoints; p++)
+            for(uint16_t p = 0; p < this->spline1.size(); p++)
             {
-                glm::vec3 p1 = this->dataModel->vertices[
-                    p + (s * this->dataModel->profilePoints)
-                ];
+                glm::vec3 p1 = this->splines[p + (s * this->spline1.size())];
 
                 glm::vec3 p2 = glm::rotateZ(p1, angle);
 
-                this->dataModel->vertices.push_back(p2);
+                this->splines.push_back(p2);
             }
         }
     }
@@ -392,12 +386,15 @@ std::vector<glm::vec3> Spline::translateProfileCurve(
     return new_p;
 }
 
-void Spline::printVertices() const
+void Spline::printVertices()
 {
-    for(auto const& v: this->dataModel->vertices)
-    {
+    printf("Data vertices:\n");
+    for(const auto &v: *this->getDataVertices())
         printf("(%f, %f, %f)\n", v[0], v[1], v[2]);
-    }
+
+    printf("\nDraw vertices:\n");
+    for(const auto &v: *this->getDrawVertices())
+        printf("(%f, %f, %f)\n", v[0], v[1], v[2]);
     printf("\n");
 }
 
@@ -465,7 +462,7 @@ bool Spline::genCatmullRomSpline()
     );
 
     float tmax = 10.0f;
-    float step = 1.0f / tmax;
+    float step = 5.0f / tmax;
 
     // add artificial before first
     drawVertices->insert(drawVertices->begin(), drawVertices->at(0) - step);

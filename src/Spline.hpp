@@ -72,7 +72,7 @@ class Spline : public Mesh
 
         void rotate(const int x, const int y, const int z);
 
-        void printVertices() const;
+        void printVertices();
         void printVerticesIndices() const;
 
     private:

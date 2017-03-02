@@ -50,5 +50,4 @@ class DataModel
         uint16_t spans = 0;
         std::vector<glm::vec3> profileVertices;
         std::vector<glm::vec3> trajectoryVertices;
-        std::vector<glm::vec3> vertices;
 };

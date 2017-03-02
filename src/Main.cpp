@@ -331,20 +331,16 @@ void key_callback(GLFWwindow* w, int key, int scancode,
 
                     case Spline::DrawStage::TWO:
                         mesh->setDrawStage(Spline::DrawStage::THREE);
+
                         mesh->uploadVertices();
                         mesh->saveData();
-
-                        printf("\n\nbefore sweep:\n");
-                        mesh->printVertices();
-                        printf("\nindices:\n");
-                        mesh->printVerticesIndices();
 
                         mesh->sweep();
                         mesh->genSplinesIndices();
 
                         mesh->uploadVertices();
 
-                        printf("\n\nafter sweep:\n");
+                        printf("\n\nafter sweep:\n-------------\nvertices:\n");
                         mesh->printVertices();
                         printf("\nindices:\n");
                         mesh->printVerticesIndices();
