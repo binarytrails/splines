@@ -14,5 +14,5 @@ void main()
     if (!colorize)
         color = vec4(c3, 1.0f);
     else
-        color = vec4(c1, 1.0f);
+        color = vec4(c1 * 2, 1.0f);
 }
