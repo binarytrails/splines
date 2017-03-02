@@ -2,11 +2,8 @@
 
 Generating 3d shapes by drawing splines and using them for translational or rotational sweeping
 
-![](images/rotational_umbrella-1.png)
 ![](images/rotational_umbrella-2.png)
 ![](images/rotational_umbrella-3.png)
-![](images/rotational_umbrella-4.png)
-![](images/rotational_umbrella-5.png)
 ![](images/rotational_sharp_bowl-1.png)
 
 ## Setup
