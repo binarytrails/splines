@@ -26,9 +26,13 @@ Generating 3d shapes by drawing splines and using them for translational or rota
 
 * ~~Use an orthographic projection for simplicity~~
 
-* Use the subdivision technique presented in class for drawing the spline
-
 * Generate indices to draw lines (l)
+
+### Extra
+
+* ~~Compute the sweep surfaces~~
+
+* Use the subdivision algorithm taking into account the curvature (rather than distance) for drawing the curve
 
 ## Usage
 
@@ -38,21 +42,24 @@ An example command:
 
 ### Controls
 
-    left mouse click    marks control points in the window
+    [Slines drawing]
+        left mouse click    marks control points in the window
+        s                   generate spline
+        enter1              generates spline
+        enter2              goes to next spline
+        l                   switch to previous spline
+        r                   switch to next spline
+        backspace           resets the application
 
-    enter               computes and draws the spline based on the control points
-    backspace           resets the application (removes all control points, interpolated points etc)
-
-    rotate              arrows
-    
-    w                   move forward
-    s                   move backward
-    a                   move left
-    d                   move right
-    
-    l                   display lines
-    t                   display triangles
-    p                   display points
+    [Generated spline visualization]
+        rotate              arrows
+        w                   move forward
+        s                   move backward
+        a                   move left
+        d                   move right
+        l                   display lines
+        t                   display triangles
+        p                   display points
 
 ## Setup
 
