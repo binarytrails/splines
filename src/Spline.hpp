@@ -70,7 +70,7 @@ class Spline : public Mesh
 
         void sweep();
 
-        void rotate(const int x, const int y, const int z);
+        void rotate(const glm::vec3 binaryAxes);
 
         void printVertices();
         void printVerticesIndices() const;
@@ -98,6 +98,4 @@ class Spline : public Mesh
         glm::mat4 model;
         // used for rotation
         float angleStep = 0.05f;
-        float xAngle = 0.0f;
-        float yAngle = 0.0f;
 };

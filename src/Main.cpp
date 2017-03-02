@@ -339,12 +339,6 @@ void key_callback(GLFWwindow* w, int key, int scancode,
                         mesh->genSplinesIndices();
 
                         mesh->uploadVertices();
-
-                        printf("\n\nafter sweep:\n-------------\nvertices:\n");
-                        mesh->printVertices();
-                        printf("\nindices:\n");
-                        mesh->printVerticesIndices();
-
                         break;
                 }
                 keyEnterCounter = 0;
@@ -373,19 +367,19 @@ void key_callback(GLFWwindow* w, int key, int scancode,
     {
         if (key == GLFW_KEY_LEFT)
         {
-            mesh->rotate(0, 1, 0);
+            mesh->rotate(glm::vec3(0, -1, 0));
         }
         if (key == GLFW_KEY_RIGHT)
         {
-            mesh->rotate(0, -1, 0);
+            mesh->rotate(glm::vec3(0, 1, 0));
         }
         if (key == GLFW_KEY_UP)
         {
-            mesh->rotate(1, 0, 0);
+            mesh->rotate(glm::vec3(1, 1, 0));
         }
         if (key == GLFW_KEY_DOWN)
         {
-            mesh->rotate(-1, 0, 0);
+            mesh->rotate(glm::vec3(-1, 1, 0));
         }
 
         if (key == GLFW_KEY_W)

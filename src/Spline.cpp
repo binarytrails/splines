@@ -249,34 +249,9 @@ void Spline::setSpans(const uint16_t spans)
 }
 
 // TODO use glm:vec4 & rotate
-void Spline::rotate(const int x, const int y, const int z)
+void Spline::rotate(const glm::vec3 binaryAxes)
 {
-    //printf("x: %i  y: %i  z: %i\n", x, y, z);
-
-    if (x == 1)
-    {
-        this->xAngle = fmod((this->xAngle + this->angleStep), 360.0f);
-    }
-    else if (x == -1)
-    {
-        this->xAngle = fmod((this->xAngle - this->angleStep), 360.0f);
-    }
-
-    if (y == 1)
-    {
-        this->yAngle = fmod((this->yAngle + this->angleStep), 360.0f);
-    }
-    else if (y == -1)
-    {
-        this->yAngle = fmod((this->yAngle - this->angleStep), 360.0f);
-    }
-
-
-    this->model = glm::rotate(this->model, this->xAngle,
-                              glm::vec3(1.0f, 0.0f, 0.0f));
-
-    this->model = glm::rotate(this->model, this->yAngle,
-                              glm::vec3(0.0f, 1.0f, 0.0f));
+    this->model = glm::rotate(this->model, this->angleStep, binaryAxes);
 }
 
 void Spline::sweep()
