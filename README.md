@@ -2,25 +2,23 @@
 
 Generating 3d shapes by drawing splines and using them for translational or rotational sweeping
 
-## State of things
+## Roadmap
 
-### Todo
-
-#### Requierements
+### Requierements
 
 * ~~User decides whether to have a translational “T” or rotational sweep “R” (through console)~~
 
 * ~~The user then marks control points in the window with the mouse (assume XZ plane, Y=0). The X and Z coordinates of each point should then relate to the window coordinates where the user has clicked.~~
 
-* User can then press “Enter” which computes and draws the spline.
+* ~~User can then press “Enter” which computes and draws the spline.~~
     
-    * If the user selected translational sweep, then repeat steps 2-3 for the second set of control points resulting in two separate splines (this time assume XY plane, Z=0). The X and Y coordinates of each point should then relate to the window coordinates where the user has clicked.
+    * ~~If the user selected translational sweep, then repeat steps 2-3 for the second set of control points resulting in two separate splines (this time assume XY plane, Z=0). The X and Y coordinates of each point should then relate to the window coordinates where the user has clicked.~~
 
-* Write the points of the resulting spline/s to an output file. The output file should have the same description format as Assignment #1.
+* ~~Write the points of the resulting spline/s to an output file. The output file should have the same description format as Assignment #1.~~
 
-* Load the output file in Assignment #1 and generate smooth surfaces based on the input splines.
+* ~~Load the output file in Assignment #1 and generate smooth surfaces based on the input splines.~~
 
-#### Sub-requierements
+### Sub-requierements
 
 * ~~Create a GLFW window of size 800x800 with double buffering support~~
 
