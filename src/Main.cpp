@@ -26,6 +26,7 @@ GLenum polygonMode = GL_FILL;
 glm::mat4 view;
 glm::mat4 projection;
 
+bool resetDraw = false;
 uint8_t keyEnterCounter = 0;
 
 // Callbacks
@@ -219,23 +220,12 @@ bool shellMenu(const std::string fileSuffix)
     return true;
 }
 
-int main(int argc, char *argv[])
+void draw()
 {
-    if (argc < 2)
-    {
-        std::cout << "You did not provide any in/output file.." << std::endl;
-        return 1;
-    }
-
-    if (!shellMenu(argv[1]))
-        return 1;
-
-    // draw loop
-    while (!glfwWindowShouldClose(window->get()))
+    resetDraw = false;
+    while (!glfwWindowShouldClose(window->get()) || !resetDraw)
     {
         glfwPollEvents();
-
-        // Render
 
         if (mesh->getDrawStage() == Spline::DrawStage::THREE)
         {
@@ -266,10 +256,34 @@ int main(int argc, char *argv[])
         // swap the screen buffers
         glfwSwapBuffers(window->get());
     }
+    if (resetDraw)
+    {
+        delete camera;
+        delete mesh;
+        delete window;
 
-    delete camera;
-    delete mesh;
-    delete window;
+        std::string suffix;
+        std::cout << "Please, provide a new name: ";
+        std::cin >> suffix;
+        shellMenu(suffix);
+
+        draw();
+    }
+}
+
+int main(int argc, char *argv[])
+{
+    if (argc < 2)
+    {
+        std::cout << "You did not provide any in/output file.." << std::endl;
+        return 1;
+    }
+
+    if (!shellMenu(argv[1]))
+        return 1;
+
+    draw();
+
     return 0;
 }
 
@@ -291,6 +305,10 @@ void key_callback(GLFWwindow* w, int key, int scancode,
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
     {
         glfwSetWindowShouldClose(w, GL_TRUE);
+    }
+    if (key == GLFW_KEY_BACKSPACE && action == GLFW_PRESS)
+    {
+        resetDraw = true;
     }
 
 	if (mesh->getDrawStage() < Spline::DrawStage::THREE)
