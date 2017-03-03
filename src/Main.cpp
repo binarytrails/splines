@@ -27,7 +27,9 @@ glm::mat4 view;
 glm::mat4 projection;
 
 bool resetDraw = false;
+bool printCursorCoordinates = true;
 uint8_t keyEnterCounter = 0;
+bool mouseLeftClickHold = false;
 
 // Callbacks
 void key_callback(GLFWwindow* w, int key, int scancode, int action, int mode);
@@ -62,20 +64,19 @@ glm::vec3 getScreenCoordinates(const bool normalize)
         }
         pos.y = 0.0f;
     }
-    else if (mesh->getDrawStage() == Spline::DrawStage::TWO)
+    else if (mesh->getDrawStage() > Spline::DrawStage::ONE)
     {
         if (normalize)
         {
             npos = (projection * view) * glm::vec4(pos, 1.0f);
             pos = glm::vec3(
-                npos.x,
-                npos.y,
+                -1 * (1.0 - (2.0 * pos.x) / window->width()),
+                -1 * (1.0 - (2.0 * pos.y) / window->height()),
                 0.0f
             );
         }
         pos.z = 0.0f;
     }
-
     return pos;
 }
 
@@ -222,7 +223,9 @@ bool shellMenu(const std::string fileSuffix)
 
 void draw()
 {
+    glm::vec3 lastPos;
     resetDraw = false;
+
     while (!glfwWindowShouldClose(window->get()) || !resetDraw)
     {
         glfwPollEvents();
@@ -252,6 +255,25 @@ void draw()
         // } container matrices
 
         mesh->render(window, camera, view, projection);
+
+        if (printCursorCoordinates &&
+            mesh->getDrawStage() < Spline::DrawStage::THREE)
+        {
+            glm::vec3 pos = getScreenCoordinates(true);
+            if (lastPos != pos)
+                printf("(x, y, z) = (%f, %f, %f)\n", pos.x, pos.y, pos.z);
+        }
+
+        if (mouseLeftClickHold)
+        {
+            glm::vec3 npos = getScreenCoordinates(true);
+            glm::vec4 binaryAxes;
+
+            binaryAxes.x = (npos.x >= 0) ? 1 : -1;
+            binaryAxes.z = (npos.y >= 0) ? 1 : -1;
+
+            mesh->rotate(binaryAxes);
+        }
 
         // swap the screen buffers
         glfwSwapBuffers(window->get());
@@ -378,6 +400,10 @@ void key_callback(GLFWwindow* w, int key, int scancode,
             mesh->setDrawStage(static_cast<Spline::DrawStage>((s + 1) % 2));
             mesh->uploadVertices();
         }
+        if (key == GLFW_KEY_C && action == GLFW_PRESS)
+        {
+            printCursorCoordinates = printCursorCoordinates ? false : true;
+        }
     }
     else if (mesh->getDrawStage() == Spline::DrawStage::THREE)
     {
@@ -391,11 +417,11 @@ void key_callback(GLFWwindow* w, int key, int scancode,
         }
         if (key == GLFW_KEY_UP)
         {
-            mesh->rotate(glm::vec3(1, 1, 0));
+            mesh->rotate(glm::vec3(1, 0, 0));
         }
         if (key == GLFW_KEY_DOWN)
         {
-            mesh->rotate(glm::vec3(-1, 1, 0));
+            mesh->rotate(glm::vec3(-1, 0, 0));
         }
 
         if (key == GLFW_KEY_W)
@@ -441,10 +467,10 @@ void mouse_key_callback(GLFWwindow* w, int key,
         keyEnterCounter == 0 &&
         mesh->getDrawStage() < Spline::DrawStage::THREE)
     {
-        glm::vec3 pos = getScreenCoordinates(false);
-
         // normalized for [-1, 1] range
         glm::vec3 npos = getScreenCoordinates(true);
+
+        glm::vec3 pos = getScreenCoordinates(false);
 
         // reverse normalized test
         glm::vec3 rpos = normalizedToScreenCoordinates(npos);
@@ -466,5 +492,9 @@ void mouse_key_callback(GLFWwindow* w, int key,
         mesh->addDrawVertex(pos);
 
         mesh->uploadVertices();
+    }
+    if (mesh->getDrawStage() == Spline::DrawStage::THREE)
+    {
+        mouseLeftClickHold = mouseLeftClickHold ? false : true;
     }
 }

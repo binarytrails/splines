@@ -35,6 +35,7 @@ An example command:
         enter2              goes to next spline
         l                   switch to previous spline
         r                   switch to next spline
+        c                   print cursor coordinates
         backspace           resets the application
 
     [Generated spline visualization]
