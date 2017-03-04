@@ -118,11 +118,9 @@ void initApplication(const DataModel::SweepType sweepType)
     mesh->setSweepType(sweepType);
     mesh->setRenderMode(GL_POINTS);
 
-    // contrainer matrix {
     projection = glm::ortho(0.0f, (GLfloat) window->width(),
                             0.0f, (GLfloat) window->height(),
                             0.1f, 100.0f);
-    // } container matrix
 }
 
 bool shellMenu(const std::string fileSuffix)
@@ -230,13 +228,16 @@ void draw()
     {
         glfwPollEvents();
 
-        if (mesh->getDrawStage() == Spline::DrawStage::THREE)
-        {
+        // projection matrix {
+        if (mesh->getDrawStage() < Spline::DrawStage::THREE)
+            projection = glm::ortho(0.0f, (GLfloat) window->width(),
+                                    0.0f, (GLfloat) window->height(),
+                                    0.1f, 100.0f);
+        else if (mesh->getDrawStage() == Spline::DrawStage::THREE)
             projection = glm::perspective(
                 45.0f, (GLfloat) window->width() / (GLfloat) window->height(),
-                0.1f, 100.0f
-            );
-        }
+                0.1f, 100.0f);
+        // } projection matrix
 
         // clear the colorbuffer
         glClearColor(255, 255, 255, 0); // background color
@@ -250,9 +251,7 @@ void draw()
             mesh->genSplinesIndices(renderMode);
         */
 
-        // contrainer matrices {
         view = glm::translate(camera->view(), glm::vec3(0.0f, 0.0f, -3.0f));
-        // } container matrices
 
         mesh->render(window, camera, view, projection);
 
