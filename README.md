@@ -4,6 +4,9 @@ Generating 3D shapes by drawing splines and using them for translational or rota
 
 ![](images/rotational_umbrella-2.png)
 ![](images/rotational_umbrella-3.png)
+
+More artsy shapes on [rotation-wo-radians](https://github.com/sevaivanov/sweeping-splines/tree/rotation-wo-radians) branch :
+
 ![](images/rotational_sharp_bowl-1.png)
 
 ## Setup
