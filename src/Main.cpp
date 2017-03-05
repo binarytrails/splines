@@ -29,7 +29,9 @@ glm::mat4 projection;
 bool resetDraw = false;
 bool printCursorCoordinates = true;
 uint8_t keyEnterCounter = 0;
-bool mouseLeftClickHold = false;
+
+bool mouseLeftClickRelease = false;
+glm::vec3 posCursorClick;
 
 // Callbacks
 void key_callback(GLFWwindow* w, int key, int scancode, int action, int mode);
@@ -260,18 +262,26 @@ void draw()
         {
             glm::vec3 pos = getScreenCoordinates(true);
             if (lastPos != pos)
-                printf("(x, y, z) = (%f, %f, %f)\n", pos.x, pos.y, pos.z);
+                printf("cursorCoords(x, y, z) = (%f, %f, %f)\n",
+                       pos.x, pos.y, pos.z);
         }
 
-        if (mouseLeftClickHold)
+
+        if (mouseLeftClickRelease)
         {
-            glm::vec3 npos = getScreenCoordinates(true);
-            glm::vec4 binaryAxes;
+            glm::vec3 posOff = getScreenCoordinates(true) - posCursorClick;
 
-            binaryAxes.x = (npos.x >= 0) ? 1 : -1;
-            binaryAxes.z = (npos.y >= 0) ? 1 : -1;
+            printf("posOff(x, y, z) = (%f, %f, %f)\n",
+                   posOff.x, posOff.y, posOff.z);
 
-            mesh->rotate(binaryAxes);
+            glm::vec3 binarySteps(
+                ((posOff.x >= 0) ? 1 : -1) * posOff.x,
+                ((posOff.y >= 0) ? 1 : -1) * posOff.y,
+                0.00f);
+
+            //mesh->rotate(axesSteps);
+
+            mouseLeftClickRelease = false;
         }
 
         // swap the screen buffers
@@ -492,8 +502,19 @@ void mouse_key_callback(GLFWwindow* w, int key,
 
         mesh->uploadVertices();
     }
-    if (mesh->getDrawStage() == Spline::DrawStage::THREE)
+    else if (mesh->getDrawStage() == Spline::DrawStage::THREE)
     {
-        mouseLeftClickHold = mouseLeftClickHold ? false : true;
+        if (key == GLFW_MOUSE_BUTTON_LEFT)
+        {
+            switch (action)
+            {
+                case GLFW_PRESS:
+                    posCursorClick = getScreenCoordinates(true);
+                    break;
+                 case GLFW_RELEASE:
+                    mouseLeftClickRelease = true;
+                    break;
+            }
+        }
     }
 }
