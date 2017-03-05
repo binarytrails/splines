@@ -34,9 +34,11 @@ bool mouseLeftPress = false;
 glm::vec3 posCursorClick;
 
 // Callbacks
-void key_callback(GLFWwindow* w, int key, int scancode, int action, int mode);
+void key_callback(GLFWwindow *w, int key, int scancode, int action, int mode);
 
-void mouse_key_callback(GLFWwindow* w, int key, int action, int mode);
+void mouse_key_callback(GLFWwindow *w, int key, int action, int mode);
+
+void mouse_scroll_callback(GLFWwindow *w, double xoffset, double yoffset);
 
 void framebuffer_size_callback(GLFWwindow* w, int width, int height);
 
@@ -107,6 +109,7 @@ void initApplication(const DataModel::SweepType sweepType)
     glfwSetKeyCallback(window->get(), key_callback);
     glfwSetMouseButtonCallback(window->get(), mouse_key_callback);
     glfwSetFramebufferSizeCallback(window->get(), framebuffer_size_callback);
+    glfwSetScrollCallback(window->get(), mouse_scroll_callback);
 
     glewExperimental = GL_TRUE;
     glewInit();
@@ -427,11 +430,11 @@ void key_callback(GLFWwindow* w, int key, int scancode,
 
         if (key == GLFW_KEY_W)
         {
-            camera->moveForward();
+            camera->moveDown();
         }
         if (key == GLFW_KEY_S)
         {
-            camera->moveBackward();
+            camera->moveUp();
         }
         if (key == GLFW_KEY_A)
         {
@@ -510,4 +513,12 @@ void mouse_key_callback(GLFWwindow* w, int key,
             }
         }
     }
+}
+
+void mouse_scroll_callback(GLFWwindow *w, double xoffset, double yoffset)
+{
+    if (yoffset > 0)
+        camera->moveForward();
+    else if (yoffset < 0)
+        camera->moveBackward();
 }

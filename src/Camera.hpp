@@ -18,10 +18,13 @@ class Camera
 
         glm::mat4 view() const;
 
+        void moveUp();
+        void moveRight();
+        void moveDown();
+        void moveLeft();
+
         void moveForward();
         void moveBackward();
-        void moveLeft();
-        void moveRight();
 
     private:
         glm::vec3 eye;

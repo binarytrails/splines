@@ -33,12 +33,22 @@ void Camera::moveBackward()
     //printf("eye(%f, %f, %f)\n", this->eye.x, this->eye.y, this->eye.z);
 }
 
-void Camera::moveLeft()
+void Camera::moveUp()
 {
-    this->eye += glm::normalize(glm::cross(this->at, this->up)) * this->speed;
+    this->eye += this->speed * this->up;
 }
 
 void Camera::moveRight()
 {
     this->eye -= glm::normalize(glm::cross(this->at, this->up)) * this->speed;
+}
+
+void Camera::moveDown()
+{
+    this->eye -= this->speed * this->up;
+}
+
+void Camera::moveLeft()
+{
+    this->eye += glm::normalize(glm::cross(this->at, this->up)) * this->speed;
 }

@@ -29,23 +29,31 @@ An example command:
 ### Controls
 
     [Slines drawing]
-        left mouse click    marks control points in the window
+        mouse-l             marks control points in the window
+        scroll              zoom in / zoom out (z)
+
+        enter x 1           generates spline
+        enter x 2           goes to next spline
+        
         s                   generate spline
-        enter1              generates spline
-        enter2              goes to next spline
         l                   switch to previous spline
         r                   switch to next spline
         c                   print cursor coordinates
+        
         backspace           resets the application
 
     [Generated spline visualization]
-        rotate              arrows
-        w                   move forward
-        s                   move backward
+        mouse-l + move      rotate on (x, y)
+        
+        arrows              rotate on (x, y)
+        
+        w                   move up
+        s                   move down
         a                   move left
         d                   move right
-        l                   display lines
+
         t                   display triangles
+        l                   display lines
         p                   display points
 
 
