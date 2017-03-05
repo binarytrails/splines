@@ -316,7 +316,7 @@ void Spline::sweep()
             this->addDrawVertex(vertex); // adds to splines
 
         // remove radians for artsy shapes
-        GLfloat angle = glm::radians(360.0f / this->dataModel->spans);
+        GLfloat angle = 360.0f / this->dataModel->spans;
 
         for(uint16_t s = 0; s < this->dataModel->spans; s++)
         {
