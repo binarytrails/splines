@@ -1,5 +1,0 @@
-# original
-https://github.com/sevaivanov/comp371/
-
-# new repository for its subfolder
-https://github.com/sevaivanov/splines/

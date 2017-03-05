@@ -1,6 +1,6 @@
-# Splines
+# Sweeping Splines
 
-Generating 3d shapes by drawing splines and using them for translational or rotational sweeping
+Generating 3D shapes by drawing splines and using them for translational or rotational sweeping
 
 ![](images/rotational_umbrella-2.png)
 ![](images/rotational_umbrella-3.png)
@@ -28,7 +28,8 @@ An example command:
 
 ### Controls
 
-    [Slines drawing]
+    [Splines Drawing]
+        
         mouse-l             marks control points in the window
         scroll              zoom in / zoom out (z)
 
@@ -42,7 +43,8 @@ An example command:
         
         backspace           resets the application
 
-    [Generated spline visualization]
+    [3D Shape]
+        
         mouse-l + move      rotate on (x, y)
         
         arrows              rotate on (x, y)

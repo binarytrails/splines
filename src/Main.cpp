@@ -103,7 +103,7 @@ glm::vec3 normalizedToScreenCoordinates(const glm::vec3 npos)
 void initApplication(const DataModel::SweepType sweepType)
 {
     camera = new Camera();
-    window = new Window(800, 800, "Splines - Assignment 2");
+    window = new Window(800, 800, "Sweeping Splines");
 
     // FIXME move into window but allow them to access mesh?
     glfwSetKeyCallback(window->get(), key_callback);
