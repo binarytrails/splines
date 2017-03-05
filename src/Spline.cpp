@@ -249,10 +249,17 @@ void Spline::setSpans(const uint16_t spans)
     this->dataModel->spans = spans;
 }
 
-// TODO use glm:vec4 & rotate
-void Spline::rotate(const glm::vec3 binaryAxes)
+void Spline::rotate(const glm::vec3 axesSpins)
 {
-    this->model = glm::rotate(this->model, this->angleStep, binaryAxes);
+    this->model = glm::rotate(this->model,
+                              axesSpins.x * this->angleStep,
+                              glm::vec3(1, 0, 0));
+    this->model = glm::rotate(this->model,
+                              axesSpins.y * this->angleStep,
+                              glm::vec3(0, 1, 0));
+    this->model = glm::rotate(this->model,
+                              axesSpins.z * this->angleStep,
+                              glm::vec3(0, 0, 1));
 }
 
 void Spline::sweep()

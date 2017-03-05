@@ -27,10 +27,10 @@ glm::mat4 view;
 glm::mat4 projection;
 
 bool resetDraw = false;
-bool printCursorCoordinates = true;
+bool printCursorCoordinates = false;
 uint8_t keyEnterCounter = 0;
 
-bool mouseLeftClickRelease = false;
+bool mouseLeftPress = false;
 glm::vec3 posCursorClick;
 
 // Callbacks
@@ -267,21 +267,13 @@ void draw()
         }
 
 
-        if (mouseLeftClickRelease)
+        if (mouseLeftPress)
         {
             glm::vec3 posOff = getScreenCoordinates(true) - posCursorClick;
 
-            printf("posOff(x, y, z) = (%f, %f, %f)\n",
-                   posOff.x, posOff.y, posOff.z);
+            glm::vec3 axesSpins(posOff.x, posOff.y, 0);
 
-            glm::vec3 binarySteps(
-                ((posOff.x >= 0) ? 1 : -1) * posOff.x,
-                ((posOff.y >= 0) ? 1 : -1) * posOff.y,
-                0.00f);
-
-            //mesh->rotate(axesSteps);
-
-            mouseLeftClickRelease = false;
+            mesh->rotate(axesSpins);
         }
 
         // swap the screen buffers
@@ -510,9 +502,10 @@ void mouse_key_callback(GLFWwindow* w, int key,
             {
                 case GLFW_PRESS:
                     posCursorClick = getScreenCoordinates(true);
+                    mouseLeftPress = true;
                     break;
                  case GLFW_RELEASE:
-                    mouseLeftClickRelease = true;
+                    mouseLeftPress = false;
                     break;
             }
         }

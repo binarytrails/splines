@@ -70,7 +70,7 @@ class Spline : public Mesh
 
         void sweep();
 
-        void rotate(const glm::vec3 binaryAxes);
+        void rotate(const glm::vec3 axesSpins);
 
         void printVertices();
         void printVerticesIndices() const;
