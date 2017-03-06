@@ -1,6 +1,6 @@
 # Sweeping Splines
 
-Generating 3D shapes by drawing splines and using them for translational or rotational sweeping
+This project is generating 3D shapes by drawing splines with modern OpenGL in C++. These polygon curves are used as input for translational or rotational sweeping to create three dimentional shapes. A user can explore these artifacts using controls to zoom in, move around and rotate the model.
 
 ![](images/rotational_umbrella-2.png)
 ![](images/rotational_umbrella-3.png)
