@@ -466,9 +466,9 @@ bool Spline::genCatmullRomSpline()
     float step = 1.0f / tmax;
 
     // add artificial before first
-    drawVertices->insert(drawVertices->begin(), drawVertices->at(0) - step);
+    //drawVertices->insert(drawVertices->begin(), drawVertices->at(0) - step);
     // add artificial after last
-    drawVertices->push_back(drawVertices->at(drawVertices->size()-1) + step);
+    //drawVertices->push_back(drawVertices->at(drawVertices->size()-1) + step);
 
     std::vector<glm::vec3> vbuffer;
 

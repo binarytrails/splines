@@ -86,7 +86,9 @@ An example command:
 
 * ~~Use an orthographic projection for simplicity~~
 
-* Generate indices to draw lines (l)
+* Splines : Generate indices to draw lines (l)
+
+* Splines : don't add artificial points before 0 & after n - 1 points and make those red
 
 ### Extra
 
